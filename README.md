@@ -146,15 +146,132 @@ Tolerance: number ±1, percent ±0.01
 
 ---
 
-## Phân công công việc gợi ý
+## Phân công 4 người
 
-| Task | Mô tả | Priority |
-|------|-------|----------|
-| Tăng accuracy Gemini | Debug các câu sai trong train, tune system prompt | 🔴 Cao |
-| Tạo SFT data | Chạy full 3000 câu, chạy make_sft.py | 🔴 Cao |
-| Fine-tune Qwen3-14B | LoRA training trên dữ liệu SFT | 🔴 Cao |
-| Docker packaging | Đóng gói model + predict.sh | 🟡 Trung |
-| Public test submit | Test trên leaderboard | 🟡 Trung |
+### Người 1 — Agent & Accuracy
+**Mục tiêu**: chạy inference toàn bộ 3000 câu train, tối đa hóa accuracy
+
+Làm ngay:
+```bash
+# Kill process cũ nếu còn
+kill <PID>
+
+# Chạy 5 batch song song (mỗi batch 600 câu)
+DATAMATE_LLM_BACKEND=gemini GEMINI_MODEL=gemini-3.8-flash GEMINI_API_KEY=<key> \
+  python3 code/agent.py --split train --offset 0    --limit 600 --out sub_0.jsonl > log_0.log 2>&1 &
+
+DATAMATE_LLM_BACKEND=gemini GEMINI_MODEL=gemini-3.8-flash GEMINI_API_KEY=<key> \
+  python3 code/agent.py --split train --offset 600  --limit 600 --out sub_1.jsonl > log_1.log 2>&1 &
+
+DATAMATE_LLM_BACKEND=gemini GEMINI_MODEL=gemini-3.8-flash GEMINI_API_KEY=<key> \
+  python3 code/agent.py --split train --offset 1200 --limit 600 --out sub_2.jsonl > log_2.log 2>&1 &
+
+DATAMATE_LLM_BACKEND=gemini GEMINI_MODEL=gemini-3.8-flash GEMINI_API_KEY=<key> \
+  python3 code/agent.py --split train --offset 1800 --limit 600 --out sub_3.jsonl > log_3.log 2>&1 &
+
+DATAMATE_LLM_BACKEND=gemini GEMINI_MODEL=gemini-3.8-flash GEMINI_API_KEY=<key> \
+  python3 code/agent.py --split train --offset 2400 --limit 600 --out sub_4.jsonl > log_4.log 2>&1 &
+
+# Merge khi xong
+cat sub_0.jsonl sub_1.jsonl sub_2.jsonl sub_3.jsonl sub_4.jsonl > submission_full.jsonl
+python3 code/scorer.py --split train --sub submission_full.jsonl -v
+```
+
+Output cần có: `submission_full.jsonl` (3000 dòng)
+
+---
+
+### Người 2 — SFT Data Pipeline
+**Mục tiêu**: kiểm tra `make_sft.py` hoạt động đúng, tạo SFT dataset sạch
+
+Làm ngay (không cần chờ 3000 câu):
+```bash
+git clone https://github.com/Justinbiahoi-coding/datamate
+cd datamate
+
+# Test với submission nhỏ trước (cần có train/data/ và train/answers.jsonl)
+python3 code/make_sft.py --sub submission.jsonl --split train --out sft_test.jsonl
+
+# Xem output
+cat sft_test.jsonl | python3 -c "import sys,json; [print(json.dumps(json.loads(l), ensure_ascii=False, indent=2)) for l in sys.stdin]" | head -60
+```
+
+Khi Người 1 xong:
+```bash
+python3 code/make_sft.py --sub submission_full.jsonl --split train --out sft_data.jsonl
+wc -l sft_data.jsonl  # nên có ~1500-2000 dòng
+```
+
+Output cần có: `sft_data.jsonl`
+
+---
+
+### Người 3 — Fine-tune
+**Mục tiêu**: fine-tune Qwen3-8B trên Kaggle, export weights
+
+Làm ngay (không cần chờ SFT data):
+1. Mở [kaggle.com/code](https://kaggle.com/code) → New Notebook → GPU T4 ×2
+2. Upload `code/train_kaggle.py`
+3. Test script chạy được với fake data:
+```python
+# Test 10 steps để confirm setup
+!python train_kaggle.py --model Qwen/Qwen3-8B --data fake --steps 10
+```
+4. Confirm VRAM < 32GB (2×T4 = 32GB tổng)
+
+Khi có `sft_data.jsonl` từ Người 2:
+```bash
+python3 code/train_kaggle.py \
+  --model Qwen/Qwen3-8B \
+  --data sft_data.jsonl \
+  --out ./checkpoints
+```
+
+Output cần có: checkpoint weights (`.safetensors`)
+
+---
+
+### Người 4 — Docker & Submit
+**Mục tiêu**: Docker image chạy được, submit lên leaderboard
+
+Làm ngay (không cần chờ ai):
+```bash
+git clone https://github.com/Justinbiahoi-coding/datamate
+cd datamate
+```
+
+Tạo 2 file sau:
+
+**`predict.sh`**:
+```bash
+#!/bin/bash
+set -e
+python3 /app/code/agent.py \
+  --split ${SPLIT:-public_test} \
+  --data-dir /data \
+  --out /result/submission.jsonl
+```
+
+**`Dockerfile`**:
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY code/ /app/code/
+COPY predict.sh /app/
+RUN pip install --no-cache-dir pandas openpyxl xlrd tqdm transformers torch
+RUN chmod +x /app/predict.sh
+ENTRYPOINT ["/app/predict.sh"]
+```
+
+Test build:
+```bash
+docker build -t datamate .
+docker run --rm -v $(pwd)/public_test:/data -v $(pwd)/result:/result datamate
+```
+
+Khi có model weights từ Người 3: copy vào image, test lại.
+
+Output cần có: `Dockerfile` + `predict.sh` commit lên repo
 
 ---
 

@@ -446,6 +446,7 @@ def main():
     parser.add_argument("--data-dir", default=None)
     parser.add_argument("--out", default="submission.jsonl")
     parser.add_argument("--limit", type=int, default=None, help="Process only N questions")
+    parser.add_argument("--offset", type=int, default=0, help="Skip first N questions")
     args = parser.parse_args()
 
     base = Path(args.data_dir) if args.data_dir else ROOT
@@ -465,6 +466,8 @@ def main():
     with open(questions_path, encoding="utf-8") as f:
         questions = [json.loads(line) for line in f if line.strip()]
 
+    if args.offset:
+        questions = questions[args.offset :]
     if args.limit:
         questions = questions[: args.limit]
 
