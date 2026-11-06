@@ -1,0 +1,26 @@
+# Competition data (không commit lên git)
+train/data/
+public_test/data/
+train/answers.jsonl
+submission*.jsonl
+
+# Research / reports (optional)
+research_notes/
+reports/
+
+# System
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.env
+
+# Model checkpoints (lớn)
+checkpoints/
+*.bin
+*.safetensors
+*.gguf
+
+# Jupyter
+.ipynb_checkpoints/
