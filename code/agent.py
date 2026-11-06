@@ -350,11 +350,35 @@ def infer_type(value: Any) -> tuple[str, Any]:
 
 # ── LLM stub (replace with vLLM call) ───────────────────────────────────────
 
+_LOCAL_MODEL = None
+_LOCAL_TOKENIZER = None
+
 def call_llm(prompt: str, system: str = SYSTEM_PROMPT, history: list = None) -> str:
-    """Call LLM. Set DATAMATE_LLM_BACKEND env to 'gemini' or 'groq'. Default: abstain."""
+    """Call LLM. Backends: 'gemini', 'groq', 'anthropic', 'local'. Default: abstain."""
     import os
     backend = os.environ.get("DATAMATE_LLM_BACKEND", "")
     messages = history or []
+
+    if backend == "local":
+        # Offline inference cho Docker submission
+        global _LOCAL_MODEL, _LOCAL_TOKENIZER
+        if _LOCAL_MODEL is None:
+            import torch
+            from transformers import AutoModelForCausalLM, AutoTokenizer
+            model_path = os.environ.get("LOCAL_MODEL_PATH", "/app/models/qwen3-8b-datamate")
+            _LOCAL_TOKENIZER = AutoTokenizer.from_pretrained(model_path)
+            _LOCAL_MODEL = AutoModelForCausalLM.from_pretrained(
+                model_path, torch_dtype=torch.bfloat16, device_map="auto",
+            )
+            _LOCAL_MODEL.eval()
+        import torch
+        msgs = [{"role": "system", "content": system}] + messages + [{"role": "user", "content": prompt}]
+        text = _LOCAL_TOKENIZER.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
+        inputs = _LOCAL_TOKENIZER(text, return_tensors="pt").to(_LOCAL_MODEL.device)
+        with torch.no_grad():
+            out = _LOCAL_MODEL.generate(**inputs, max_new_tokens=2000, temperature=0.3, do_sample=True, pad_token_id=_LOCAL_TOKENIZER.eos_token_id)
+        return _LOCAL_TOKENIZER.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+
 
     if backend == "gemini":
         import time as _time
@@ -363,19 +387,42 @@ def call_llm(prompt: str, system: str = SYSTEM_PROMPT, history: list = None) -> 
         contents = [{"role": "user" if m["role"] == "user" else "model",
                      "parts": [{"text": m["content"]}]} for m in messages]
         contents.append({"role": "user", "parts": [{"text": prompt}]})
+        import signal as _signal
+        def _timeout_handler(signum, frame):
+            raise TimeoutError("Gemini API timeout")
+
         for _retry in range(5):
             try:
-                resp = client.models.generate_content(
-                    model=os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite"),
-                    contents=contents,
-                    config={"system_instruction": system, "max_output_tokens": 2000, "temperature": 0.3},
-                )
+                _signal.signal(_signal.SIGALRM, _timeout_handler)
+                _signal.alarm(120)  # 2 phút timeout mỗi call
+                try:
+                    resp = client.models.generate_content(
+                        model=os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite"),
+                        contents=contents,
+                        config={"system_instruction": system, "max_output_tokens": 2000, "temperature": 0.3},
+                    )
+                finally:
+                    _signal.alarm(0)
                 return resp.text
             except Exception as _e:
-                if _retry < 4 and ("503" in str(_e) or "UNAVAILABLE" in str(_e) or "429" in str(_e)):
+                if _retry < 4 and ("503" in str(_e) or "UNAVAILABLE" in str(_e) or "429" in str(_e) or "timeout" in str(_e).lower()):
                     _time.sleep(30 * (_retry + 1))
                     continue
                 raise
+
+    if backend == "anthropic":
+        import anthropic as _anthropic
+        client = _anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        msgs = [{"role": m["role"], "content": m["content"]} for m in messages]
+        msgs.append({"role": "user", "content": prompt})
+        resp = client.messages.create(
+            model=os.environ.get("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001"),
+            max_tokens=2000,
+            temperature=0.3,
+            system=system,
+            messages=msgs,
+        )
+        return resp.content[0].text
 
     if backend == "groq":
         from openai import OpenAI
@@ -474,8 +521,22 @@ def main():
     out_path = Path(args.out)
     n_abstain = n_answered = 0
 
-    with open(out_path, "w", encoding="utf-8") as fout:
+    # Resume: skip câu đã trả lời trong lần chạy trước
+    done_ids = set()
+    if out_path.exists():
+        with open(out_path, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    done_ids.add(json.loads(line)["id"])
+                except Exception:
+                    pass
+        print(f"Resume: {len(done_ids)} câu đã trả lời, skip chúng")
+
+    mode = "a" if done_ids else "w"
+    with open(out_path, mode, encoding="utf-8") as fout:
         for i, item in enumerate(questions):
+            if item["id"] in done_ids:
+                continue
             try:
                 result = infer(item, split_root, rulebook)
             except Exception as e:
@@ -483,6 +544,7 @@ def main():
             # Strip internal debug keys before writing
             submission_item = {k: v for k, v in result.items() if not k.startswith("_")}
             fout.write(json.dumps(submission_item, ensure_ascii=False) + "\n")
+            fout.flush()  # flush ngay, không mất khi crash
 
             if result.get("type") == "abstain":
                 n_abstain += 1

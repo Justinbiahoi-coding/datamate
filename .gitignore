@@ -1,8 +1,19 @@
 # Competition data (không commit lên git)
-train/data/
-public_test/data/
-train/answers.jsonl
+train/
+public_test/
+infor/
 submission*.jsonl
+sub_*.jsonl
+sub_test.jsonl
+*.zip
+
+# Logs
+*.log
+run_full.log
+log_*.log
+
+# Model
+models/
 
 # Research / reports (optional)
 research_notes/
