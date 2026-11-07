@@ -478,11 +478,11 @@ def infer(item: dict, split_root: Path, rulebook: str, max_retries: int = 2) -> 
         try:
             result = exec_code(last_code, biz_data, as_of_date)
             ans_type, ans_val = infer_type(result)
-            return {"id": qid, "type": ans_type, "answer": ans_val}
+            return {"id": qid, "type": ans_type, "answer": ans_val, "_code": last_code}
         except Exception as exc:
             last_err = str(exc)[:300]
 
-    return {"id": qid, "type": "abstain", "answer": None, "_err": last_err}
+    return {"id": qid, "type": "abstain", "answer": None, "_err": last_err, "_code": last_code}
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
@@ -494,6 +494,8 @@ def main():
     parser.add_argument("--out", default="submission.jsonl")
     parser.add_argument("--limit", type=int, default=None, help="Process only N questions")
     parser.add_argument("--offset", type=int, default=0, help="Skip first N questions")
+    parser.add_argument("--save-code", action="store_true",
+                        help="Lưu _code đã sinh (dùng cho make_sft.py)")
     args = parser.parse_args()
 
     base = Path(args.data_dir) if args.data_dir else ROOT
@@ -541,8 +543,11 @@ def main():
                 result = infer(item, split_root, rulebook)
             except Exception as e:
                 result = {"id": item["id"], "type": "abstain", "answer": None, "_err": f"fatal:{str(e)[:150]}"}
-            # Strip internal debug keys before writing
-            submission_item = {k: v for k, v in result.items() if not k.startswith("_")}
+            # Strip internal debug keys (giữ _code nếu --save-code)
+            if args.save_code:
+                submission_item = {k: v for k, v in result.items() if k != "_err"}
+            else:
+                submission_item = {k: v for k, v in result.items() if not k.startswith("_")}
             fout.write(json.dumps(submission_item, ensure_ascii=False) + "\n")
             fout.flush()  # flush ngay, không mất khi crash
 

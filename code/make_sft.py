@@ -158,6 +158,57 @@ def make_messages(prompt: str, code: str) -> list[dict]:
     ]
 
 
+# ── Mode: tái dùng submission.jsonl (không gọi LLM) ───────────────────────────
+
+def main_from_submission(args):
+    """Đọc submission.jsonl có _code, lọc câu đúng → SFT data."""
+    base = Path(args.data_dir) if args.data_dir else ROOT
+    split_root = base / "train"
+    rulebook = (split_root / "rulebook.md").read_text(encoding="utf-8")
+
+    with open(split_root / "answers.jsonl", encoding="utf-8") as f:
+        gold_index = {json.loads(l)["id"]: json.loads(l) for l in f if l.strip()}
+    with open(split_root / "questions.jsonl", encoding="utf-8") as f:
+        q_index = {json.loads(l)["id"]: json.loads(l) for l in f if l.strip()}
+
+    n_ok = n_wrong = n_nocode = 0
+    with open(args.from_submission, encoding="utf-8") as fin, \
+         open(args.out, "w", encoding="utf-8") as fout:
+        for line in fin:
+            sub = json.loads(line)
+            qid = sub["id"]
+            gold = gold_index.get(qid)
+            code = sub.get("_code")
+            if gold is None or not code:
+                n_nocode += 1
+                continue
+
+            # So pred vs gold
+            if match_answer(sub["type"], sub["answer"], gold["type"], gold["answer"], gold.get("alias", [])):
+                item = q_index[qid]
+                biz_dir = split_root / "data" / item["business_id"]
+                try:
+                    biz_schema = describe_business(biz_dir)
+                except Exception:
+                    n_nocode += 1
+                    continue
+                prompt = build_prompt(item["question"], item["as_of_date"], biz_schema, rulebook[:2000])
+                record = {
+                    "id": qid,
+                    "messages": make_messages(prompt, code),
+                    "gold_type": gold["type"],
+                    "gold_answer": gold["answer"],
+                }
+                fout.write(json.dumps(record, ensure_ascii=False) + "\n")
+                n_ok += 1
+            else:
+                n_wrong += 1
+
+    print(f"Xong → {args.out}")
+    print(f"  SFT records: {n_ok}  (agent đúng, code được lưu)")
+    print(f"  Bỏ qua:      {n_wrong} (agent sai)  +  {n_nocode} (không có _code hoặc gold)")
+
+
 # ── Main pipeline ─────────────────────────────────────────────────────────────
 
 def process_question(item, gold, split_root, rulebook,
@@ -216,7 +267,13 @@ def main():
     parser.add_argument("--dry-run", action="store_true",
                         help="Print first few prompts without calling LLM")
     parser.add_argument("--data-dir", default=None)
+    parser.add_argument("--from-submission", default=None,
+                        help="Tái dùng code trong submission.jsonl (yêu cầu --save-code)")
     args = parser.parse_args()
+
+    # Mode 1: tái dùng submission.jsonl (nhanh, không gọi LLM)
+    if args.from_submission:
+        return main_from_submission(args)
 
     base = Path(args.data_dir) if args.data_dir else ROOT
     split_root = base / "train"
