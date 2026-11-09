@@ -495,29 +495,28 @@ def call_llm(prompt: str, system: str = SYSTEM_PROMPT, history: list = None) -> 
 
 # ── Per-question inference ────────────────────────────────────────────────────
 
-def infer(item: dict, split_root: Path, rulebook: str, max_retries: int = 2) -> dict:
-    qid = item["id"]
-    biz_id = item["business_id"]
-    question = item["question"]
-    as_of_date = item["as_of_date"]
-
-    biz_dir = split_root / "data" / biz_id
-
-    try:
-        biz_data = load_business(biz_dir)
-        biz_schema = describe_business(biz_dir)
-    except Exception as e:
-        return {"id": qid, "type": "abstain", "answer": None, "_err": str(e)}
-
+def build_item_prompt(item: dict, split_root: Path, rulebook: str):
+    """Return (system, prompt, biz_dir). Single source of truth for the model prompt (train/inference parity)."""
+    biz_dir = split_root / "data" / item["business_id"]
+    question, as_of_date = item["question"], item["as_of_date"]
     import os as _os
     if _os.environ.get("DATAMATE_PROMPT", "v2") == "v2":
         from prompt_v2 import SYSTEM_PROMPT_V2, describe_business_v2, build_user_prompt_v2, select_rules
-        system = SYSTEM_PROMPT_V2
-        prompt = build_user_prompt_v2(question, as_of_date, describe_business_v2(str(biz_dir)), select_rules(rulebook))
-    else:
-        system = SYSTEM_PROMPT
-        data_keys = [k for k in biz_data if not k.startswith("_")]
-        prompt = build_prompt(question, as_of_date, biz_schema, rulebook[:2000], data_keys)
+        return SYSTEM_PROMPT_V2, build_user_prompt_v2(question, as_of_date, describe_business_v2(str(biz_dir)), select_rules(rulebook)), biz_dir
+    biz_data = load_business(biz_dir)
+    data_keys = [k for k in biz_data if not k.startswith("_")]
+    return SYSTEM_PROMPT, build_prompt(question, as_of_date, describe_business(biz_dir), rulebook[:2000], data_keys), biz_dir
+
+
+def infer(item: dict, split_root: Path, rulebook: str, max_retries: int = 2) -> dict:
+    qid = item["id"]
+    as_of_date = item["as_of_date"]
+
+    try:
+        system, prompt, biz_dir = build_item_prompt(item, split_root, rulebook)
+        biz_data = load_business(biz_dir)
+    except Exception as e:
+        return {"id": qid, "type": "abstain", "answer": None, "_err": str(e)}
 
     history = []
     last_code = ""

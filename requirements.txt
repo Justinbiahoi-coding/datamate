@@ -9,3 +9,4 @@ bitsandbytes>=0.43
 peft>=0.11
 sentencepiece
 tqdm
+vllm
