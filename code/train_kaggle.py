@@ -94,25 +94,25 @@ print(f"[DATA] train={len(train_ds)}  val={len(val_ds)}")
 
 # ── Trainer ──────────────────────────────────────────────────────────────────
 
-from trl import SFTTrainer
-from transformers import TrainingArguments
+import inspect
+from trl import SFTTrainer, SFTConfig
 
-train_args = TrainingArguments(
+_sig = inspect.signature(SFTConfig.__init__).parameters
+_kw = dict(
     per_device_train_batch_size=BATCH_SIZE,
     gradient_accumulation_steps=GRAD_ACCUM,
-    warmup_ratio=0.03,                          # 3% warmup (technique #8)
     num_train_epochs=EPOCHS if MAX_STEPS < 0 else 1,
     max_steps=MAX_STEPS,                        # -1 = no cap
     learning_rate=LR,
     fp16=not torch.cuda.is_bf16_supported(),
     bf16=torch.cuda.is_bf16_supported(),
-    logging_steps=10,
+    logging_steps=int(os.environ.get("LOG_STEPS", "10")),
     output_dir=OUTPUT_DIR,
     save_strategy="steps",
-    save_steps=200,
+    save_steps=int(os.environ.get("SAVE_STEPS", "40")),
     save_total_limit=3,
     eval_strategy="steps",                      # eval on val set
-    eval_steps=100,
+    eval_steps=int(os.environ.get("SAVE_STEPS", "40")),
     load_best_model_at_end=True,                # keep best val checkpoint
     metric_for_best_model="eval_loss",
     greater_is_better=False,
@@ -120,16 +120,20 @@ train_args = TrainingArguments(
     lr_scheduler_type="cosine",                 # technique #8
     seed=SEED,
     report_to="none",
+    dataset_text_field="text",
+    packing=False,                              # samples are 7-10k tokens; packing gives no gain and mixes samples
 )
+# transformers 5 removed warmup_ratio (warmup_steps < 1 is a ratio); TRL 0.2x renamed max_seq_length -> max_length
+_kw["warmup_ratio" if "warmup_ratio" in _sig else "warmup_steps"] = 0.03
+_kw["max_length" if "max_length" in _sig else "max_seq_length"] = MAX_SEQ_LEN
+train_args = SFTConfig(**_kw)
 
+_tr = inspect.signature(SFTTrainer.__init__).parameters
 trainer = SFTTrainer(
     model=model,
-    tokenizer=tokenizer,
+    **({"processing_class": tokenizer} if "processing_class" in _tr else {"tokenizer": tokenizer}),
     train_dataset=train_ds,
     eval_dataset=val_ds,
-    dataset_text_field="text",
-    max_seq_length=MAX_SEQ_LEN,
-    packing=False,                              # samples are 7-10k tokens; packing gives no gain and mixes samples
     args=train_args,
 )
 
