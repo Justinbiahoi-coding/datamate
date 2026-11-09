@@ -1,0 +1,18 @@
+import sys, re
+from decimal import Decimal, ROUND_HALF_UP
+sys.path.insert(0, '/tmp/s9_015')
+import h117 as H
+import pandas as pd
+
+t = H.tables()
+ct, gh, nh = t['ct'], t['gh'], t['nh']
+
+
+def r0(x):
+    return int(Decimal(str(float(x))).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+
+
+def orders_between(start, end):
+    return H.n_orders(ct, start, end)
+
+RESULT = H.delivery_trips(gh, '2026-01-01', '2026-01-31')

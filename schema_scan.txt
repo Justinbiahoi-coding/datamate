@@ -1,0 +1,267 @@
+
+## biz_101
+- ban_hang: 56501 rows | ['Giá bán', 'Kết quả', 'Nội dung', 'Ngày tháng', 'Đơn vị (tính)', 'so_luong', 'Thanh tien', 'Quy ra ĐV lẻ', 'Mã hóa đơn', 'Đối tác']
+
+## biz_102
+- DanhSachQuyDoi: 77 rows | ['Tên sản phẩm', 'Đơn vị quy đổi', 'Tỉ lệ quy đổi', 'Đơn vị cơ bản']
+- DonHang_ChiTiet (dict, sheets=['T01_2025', 'T02_2025', 'T03_2025', 'T04_2025', 'T05_2025', 'T06_2025', 'T07_2025', 'T08_2025', 'T09_2025', 'T10_2025', 'T11_2025', 'T12_2025'])
+    T01_2025: 6674 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+    T02_2025: 5960 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+    T03_2025: 4785 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+- DonHang_ChiTiet__all: 86029 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+
+## biz_103
+- DanhSachQuyDoi: 77 rows | ['Tên sản phẩm', 'Đơn vị quy đổi', 'Tỉ lệ quy đổi', 'Đơn vị cơ bản']
+- DonHang_ChiTiet (dict, sheets=['04.2025', '05.2025', '06.2025', '07.2025', '08.2025', '09.2025', '10.2025', '11.2025', '12.2025', '01.2026', '02.2026', '03.2026'])
+    04.2025: 2753 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+    05.2025: 2846 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+    06.2025: 2635 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+- DonHang_ChiTiet__all: 45534 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+
+## biz_104
+- DanhSachQuyDoi: 2 rows | ['Tên sản phẩm', 'Đơn vị quy đổi', 'Tỉ lệ quy đổi', 'Đơn vị cơ bản']
+- DonHang_ChiTiet: 62894 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+
+## biz_105
+- BangGia: 78 rows | ['Ngày áp dụng', 'ten_hang', 'Giá mới', 'Giá cũ']
+- DanhMuc: 2 rows | ['Tên món', 'Đơn vị gốc', 'ĐV nhập', 'Hệ số']
+- SoBanHang_1 (dict, sheets=['Thang 02 2025', 'Thang 03 2025', 'Thang 04 2025', 'Thang 05 2025', 'Thang 06 2025', 'Thang 07 2025', 'Thang 08 2025', 'Thang 09 2025', 'Thang 10 2025', 'Thang 11 2025', 'Thang 12 2025', 'Thang 01 2026'])
+    Thang 02 2025: 6490 rows | ['Hàng', 'so_luong', 'Unit', 'Trị giá', 'Status', 'Giá lẻ', 'Giờ', 'Mã hóa đơn', 'Ngày giao dịch', 'Khách']
+    Thang 03 2025: 8139 rows | ['Hàng', 'so_luong', 'Unit', 'Trị giá', 'Status', 'Giá lẻ', 'Giờ', 'Mã hóa đơn', 'Ngày giao dịch', 'Khách']
+    Thang 04 2025: 7763 rows | ['Hàng', 'so_luong', 'Unit', 'Trị giá', 'Status', 'Giá lẻ', 'Giờ', 'Mã hóa đơn', 'Ngày giao dịch', 'Khách']
+- SoBanHang_1__all: 98904 rows | ['Hàng', 'so_luong', 'Unit', 'Trị giá', 'Status', 'Giá lẻ', 'Giờ', 'Mã hóa đơn', 'Ngày giao dịch', 'Khách']
+- SoBanHang_2026 (dict, sheets=['Thang 02 2026', 'Thang 03 2026', 'Thang 04 2026', 'Thang 05 2026', 'Thang 06 2026'])
+    Thang 02 2026: 6299 rows | ['Hàng', 'so_luong', 'Unit', 'Trị giá', 'Status', 'Giá lẻ', 'Giờ', 'Mã hóa đơn', 'Ngày giao dịch', 'Khách']
+    Thang 03 2026: 9240 rows | ['Hàng', 'so_luong', 'Unit', 'Trị giá', 'Status', 'Giá lẻ', 'Giờ', 'Mã hóa đơn', 'Ngày giao dịch', 'Khách']
+    Thang 04 2026: 8947 rows | ['Hàng', 'so_luong', 'Unit', 'Trị giá', 'Status', 'Giá lẻ', 'Giờ', 'Mã hóa đơn', 'Ngày giao dịch', 'Khách']
+- SoBanHang_2026__all: 41341 rows | ['Hàng', 'so_luong', 'Unit', 'Trị giá', 'Status', 'Giá lẻ', 'Giờ', 'Mã hóa đơn', 'Ngày giao dịch', 'Khách']
+- SoNhapHang: 1373 rows | ['Số phiếu', 'Ngày nhập', 'Ghi chu', 'Thành tiền', 'Nhà cung cấp', 'Tên mặt hàng', 'Giá nhập', 'ĐVT', 'SL nhập']
+- TonKho: 50 rows | ['Hàng hóa', 'Đơn vị tính', 'Tồn cuối']
+
+## biz_106
+- BaoCaoTonKho: 50 rows | ['Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn cuối kỳ']
+- DanhSachChiTietNhapHang: 1562 rows | ['Mã nhập hàng', 'STT', 'Mã hàng', 'ĐVT', 'Số lượng', 'Đơn giá']
+- DanhSachDonViTinh: 2 rows | ['Mã hàng', 'ĐVT', 'Quy đổi', 'Giá bán']
+- DanhSachHoaDon: 78847 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Tổng sau giảm giá', 'Khách đã trả', 'Phương thức thanh toán', 'Trạng thái', 'Thời gian tạo', 'Ghi chú']
+- DanhSachHoaDonChiTiet_1: 100000 rows | ['Mã hóa đơn', 'STT', 'Mã hàng', 'Tên hàng', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Giảm giá', 'Thành tiền', 'Số lượng quy đổi', 'Giá vốn']
+- DanhSachHoaDonChiTiet_2: 29416 rows | ['Mã hóa đơn', 'STT', 'Mã hàng', 'Tên hàng', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Giảm giá', 'Thành tiền', 'Số lượng quy đổi', 'Giá vốn']
+- DanhSachKhachHang: 240 rows | ['Email', 'Mã khách hàng', 'Trạng thái', 'Tên công ty', 'Ngày sinh', 'Tổng điểm', 'Điểm tích lũy', 'Ghi chú', 'Số CMND/CCCD', 'Tên khách hàng', 'Mã số thuế', 'Người tạo', 'Điện thoại', 'Loại hình khách']
+- DanhSachNhapHang: 513 rows | ['Mã nhập hàng', 'Thời gian', 'Mã NCC', 'Cần trả NCC', 'Trạng thái', 'Ghi chú']
+- DanhSachSanPham: 50 rows | ['Hình ảnh (url1,url2...)', 'Vị trí kệ', 'Ghi chú', 'Được bán trực tiếp', 'Nhóm hàng(3 Cấp)', 'Mã barcode', 'Mã hàng', 'Thương hiệu', 'Tồn lớn nhất', 'Tên hàng', 'Mã HH Liên quan', 'Thuộc tính', 'Giá bán', 'Mô tả sản phẩm', 'Loại hàng hóa', 'Giá vốn', 'ĐVT', 'Bảo hành', 'Đang kinh doanh', 'Trọng lượng', 'Mẫu ghi chú', 'Định mức tồn tối thiểu', 'Thời gian tạo']
+- SoQuy: 78673 rows | ['Mã phiếu', 'Thời gian', 'Mã hóa đơn', 'Phương thức thanh toán', 'Giá trị']
+
+## biz_107
+- SoBanHang: 43605 rows | ['Trạng thái xử lý', 'Tổng tiền', 'ngay_ban', 'Số lượng', 'Nội dung', 'don_gia', 'Đơn vị (tính)', 'Số lượng lẻ']
+
+## biz_108
+- BaoCaoTonKho: 60 rows | ['Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn cuối kỳ']
+- DanhSachChiTietNhapHang: 2293 rows | ['Mã nhập hàng', 'STT', 'Mã hàng', 'ĐVT', 'Số lượng', 'Đơn giá']
+- DanhSachHoaDon: 31501 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Tổng sau giảm giá', 'Còn nợ', 'Kênh bán', 'Người bán', 'Trạng thái HĐĐT']
+- DanhSachHoaDonChiTiet: 78983 rows | ['Mã hóa đơn', 'Mã hàng', 'Tên hàng', 'Số lượng', 'Đơn giá', 'Giảm giá', 'Thành tiền', 'Số lượng quy đổi', 'Đơn vị tính', 'STT']
+- DanhSachKhachHang: 300 rows | ['Đối tượng KH', 'Tổng điểm', 'Trạng thái', 'Mã số thuế', 'Mã khách hàng', 'Tên khách hàng', 'Điện thoại', 'Ngày sinh', 'Nhóm khách hàng', 'Địa chỉ', 'Người tạo', 'Giới tính', 'CCCD', 'Tên công ty', 'Điểm hiện tại', 'Ngày tạo']
+- DanhSachNhapHang: 499 rows | ['Mã nhập hàng', 'Thời gian', 'Mã NCC', 'Cần trả NCC', 'Trạng thái', 'Ghi chú']
+- DanhSachSanPham: 60 rows | ['Mã hàng', 'Tên hàng', 'Bảo hành', 'Nhóm hàng(3 Cấp)', 'Mô tả chi tiết', 'Trọng lượng', 'Vị trí', 'Hình ảnh (url1,url2...)', 'Mã barcode', 'Loại hàng hóa', 'Thuộc tính', 'Mẫu ghi chú', 'Giá bán', 'Được bán trực tiếp', 'Ghi chú', 'Mã HH Liên quan', 'ĐVT', 'Định mức tồn tối thiểu']
+
+## biz_109
+- DanhSachHoaDonChiTiet: 83284 rows | ['Mã hóa đơn', 'STT', 'Mã hàng', 'Tên hàng', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Giảm giá', 'Thành tiền', 'Số lượng quy đổi', 'Giá vốn']
+- DuLieuBanHang (dict, sheets=['DanhSachHoaDon', 'DanhSachSanPham', 'DanhSachKhachHang', 'BaoCaoTonKho', 'DanhSachNhapHang', 'DanhSachChiTietNhapHang', 'SoQuy', 'DanhSachDonViTinh'])
+    DanhSachHoaDon: 33065 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Tổng sau giảm giá', 'Khách đã trả', 'Phương thức thanh toán', 'Trạng thái', 'Thời gian tạo', 'Kênh bán', 'Người bán', 'Trạng thái HĐĐT']
+    DanhSachSanPham: 60 rows | ['Tồn lớn nhất', 'Nhóm hàng(3 Cấp)', 'Vị trí', 'Mã hàng', 'Trọng lượng', 'Thuộc tính', 'Tên hàng', 'Mẫu ghi chú', 'Giá bán', 'Hình ảnh (url1,url2...)', 'Bảo hành', 'Định mức tồn tối thiểu', 'Giá vốn', 'Thương hiệu', 'Được bán trực tiếp', 'ĐVT', 'Đang kinh doanh', 'Thời gian tạo']
+    DanhSachKhachHang: 320 rows | ['Mã khách hàng', 'Tổng điểm', 'Tên khách hàng', 'Điện thoại', 'MST', 'Trạng thái', 'Loại hình khách', 'Người tạo', 'Ghi chú KH', 'Tên công ty', 'Nhóm khách hàng', 'Ngày tạo', 'Sinh nhật']
+
+## biz_110
+- danh_sach_hoa_don: 29317 rows | ['Tien hang', 'TongTien', 'Mã bill', 'Bên mua', 'Ngày giao dịch', 'Status', 'Da tra', 'Chưa trả']
+
+## biz_111
+- chi_tiet_don: 106585 rows | ['SL quy đổi', 'Thứ tự', 'Giá đơn vị', 'SL', 'T.Tiền', 'ID SP', 'Ma don', 'Đơn vị (tính)']
+- don_hang: 66469 rows | ['Số KH', 'Xử lý', 'NgayBan', 'Bán qua', 'Còn lại', 'Khách trả', 'Tổng bill', 'Phương thức TT', 'Mã chứng từ']
+- khach_hang: 200 rows | ['ma_kh', 'Điểm tích lũy', 'Nhóm', 'Trạng thái', 'Email', 'Ghi chú KH', 'Mã số thuế', 'Loại hình khách', 'Ngày sinh', 'CCCD', 'Phone', 'Người tạo', 'Addr', 'Khách lẻ/sỉ', 'Tổng điểm']
+- san_pham: 50 rows | ['Thuộc tính', 'Được bán trực tiếp', 'Mã barcode', 'SKU', 'Hình ảnh', 'Giá', 'Đơn vị', 'Loại hàng hóa', 'Thương hiệu', 'Nhom hang', 'Trọng lượng', 'Vị trí', 'Mẫu ghi chú', 'Mô tả sản phẩm', 'Bảo hành', 'Tồn nhỏ nhất', 'Mã HH Liên quan', 'Sản phẩm']
+- thanh_toan: 66195 rows | ['Thời gian thu', 'Phương thức', 'Tiền', 'Mã phiếu thu', 'Số HĐ']
+
+## biz_112
+- Danh sách hàng hóa: 50 rows | ['Mã hàng hóa', 'Mã vạch EAN', 'Tồn nhỏ nhất', 'Trọng lượng', 'Ghi chú', 'Loại hàng hóa', 'Mã HH Liên quan', 'Mô tả sản phẩm', 'Bảo hành', 'Tên hàng hóa', 'Vị trí', 'Nhóm hàng hóa', 'Đơn vị tính', 'Giá bán', 'Tồn lớn nhất', 'Giá vốn']
+- So_chi_tiet_ban_hang_1 (dict, sheets=['T04_2025', 'T05_2025', 'T06_2025', 'T07_2025', 'T08_2025', 'T09_2025', 'T10_2025', 'T11_2025', 'T12_2025', 'T01_2026', 'T02_2026', 'T03_2026'])
+    T04_2025: 6523 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi']
+    T05_2025: 6902 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi']
+    T06_2025: 6883 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi']
+- So_chi_tiet_ban_hang_1__all: 98586 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi']
+- So_chi_tiet_ban_hang_2026 (dict, sheets=['T06_2026', 'T07_2026'])
+    T06_2026: 7083 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi']
+    T07_2026: 7656 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi']
+- So_chi_tiet_ban_hang_2026__all: 14739 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi']
+
+## biz_113
+- SoBanHang: 32994 rows | ['DonVi', 'Ngày mua', 'Số lượng lẻ', 'thanh_tien', 'Đơn giá bán', 'SL bán', 'Ghi chú TT', 'Mặt hàng']
+
+## biz_114
+- ban_hang: 26119 rows | ['Giá bán lẻ', 'Đơn vị tính', 'Mã GD', 'Quy ra ĐV lẻ', 'Sluong', 'Sản phẩm', 'Tổng', 'Tên khách', 'Ngày', 'trang_thai']
+
+## biz_115
+- Bảng kê phiếu giao hàng: 24877 rows | ['Ngày giao hàng', 'Mã đơn hàng', 'Lần giao', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng giao', 'Biển số xe', 'Người giao hàng']
+- Chi tiết công nợ theo hạn: 2304 rows | ['Mã đơn hàng', 'Số ngày được nợ', 'Hạn thanh toán']
+- Danh sách hàng hóa: 60 rows | ['Mã hàng hóa', 'Được bán trực tiếp', 'Thương hiệu', 'Tên hàng hóa', 'Nhóm hàng hóa', 'Vị trí', 'Mẫu ghi chú', 'Loại hàng hóa', 'Ghi chú', 'Đơn vị tính', 'Bảo hành', 'Giá vốn', 'Mô tả sản phẩm', 'Định mức tồn tối thiểu', 'Trọng lượng']
+- So_chi_tiet_ban_hang (dict, sheets=['02.2025', '03.2025', '04.2025', '05.2025', '06.2025', '07.2025', '08.2025', '09.2025', '10.2025', '11.2025', '12.2025', '01.2026'])
+    02.2025: 1538 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi', 'Khách hàng']
+    03.2025: 2055 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi', 'Khách hàng']
+    04.2025: 1996 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi', 'Khách hàng']
+- So_chi_tiet_ban_hang__all: 28721 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi', 'Khách hàng']
+
+## biz_116
+- Bao_cao_ban_hang (dict, sheets=['So_chi_tiet_ban_hang', 'Danh sách hàng hóa', 'Bảng kê phiếu giao hàng', 'Chi tiết công nợ theo hạn'])
+    So_chi_tiet_ban_hang: 39889 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi', 'Khách hàng']
+    Danh sách hàng hóa: 55 rows | ['Bảo hành', 'Mã hàng hóa', 'Tên hàng hóa', 'Hình ảnh (url1,url2...)', 'Thuộc tính', 'Mẫu ghi chú', 'Mô tả sản phẩm', 'Nhóm hàng hóa', 'Đơn vị tính', 'Trọng lượng', 'Tồn nhỏ nhất', 'Mã HH Liên quan', 'Ghi chú', 'Được bán trực tiếp', 'Giá vốn', 'Vị trí', 'Tồn lớn nhất']
+    Bảng kê phiếu giao hàng: 35370 rows | ['Ngày giao hàng', 'Mã đơn hàng', 'Lần giao', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng giao', 'Biển số xe', 'Người giao hàng']
+
+## biz_117
+- BangGia: 100 rows | ['Ngày áp dụng', 'Giá cũ', 'Giá mới', 'TenHang']
+- DanhMuc: 14 rows | ['Hàng', 'ĐV lớn', 'ĐV nhỏ', 'Hệ số QĐ']
+- SoBanHang (dict, sheets=['Tháng 01-2025', 'Tháng 02-2025', 'Tháng 03-2025', 'Tháng 04-2025', 'Tháng 05-2025', 'Tháng 06-2025', 'Tháng 07-2025', 'Tháng 08-2025', 'Tháng 09-2025', 'Tháng 10-2025', 'Tháng 11-2025', 'Tháng 12-2025'])
+    Tháng 01-2025: 1598 rows | ['Giờ', 'Mã phiếu', 'TenKH', 'Ngày lập', 'Tiền', 'Ghi chú TT', 'Giá', 'DonVi', 'Số lượng hàng', 'Tên SP']
+    Tháng 02-2025: 1534 rows | ['Giờ', 'Mã phiếu', 'TenKH', 'Ngày lập', 'Tiền', 'Ghi chú TT', 'Giá', 'DonVi', 'Số lượng hàng', 'Tên SP']
+    Tháng 03-2025: 2073 rows | ['Giờ', 'Mã phiếu', 'TenKH', 'Ngày lập', 'Tiền', 'Ghi chú TT', 'Giá', 'DonVi', 'Số lượng hàng', 'Tên SP']
+- SoBanHang__all: 33845 rows | ['Giờ', 'Mã phiếu', 'TenKH', 'Ngày lập', 'Tiền', 'Ghi chú TT', 'Giá', 'DonVi', 'Số lượng hàng', 'Tên SP']
+- SoGiaoHang: 28411 rows | ['ĐV gốc', 'Biển số xe', 'Mã bill', 'Lượt giao', 'SL thực giao', 'Tên hàng', 'Ngày chở', 'Người chở']
+- SoHanNo: 2722 rows | ['So hoa don', 'Hạn nợ (ngày)', 'Han tra']
+- SoNhapHang: 1134 rows | ['Số phiếu', 'Product', 'Ngày nhập', 'ĐVT', 'Thành tiền', 'Nội dung', 'Nhà cung cấp', 'SL nhập', 'Giá nhập']
+- TonKho: 60 rows | ['Tồn thực', 'Đơn vị', 'Product']
+
+## biz_118
+- Bảng kê phiếu giao hàng: 41198 rows | ['Ngày giao hàng', 'Mã đơn hàng', 'Lần giao', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng giao', 'Biển số xe', 'Người giao hàng']
+- Chi tiết công nợ theo hạn: 4915 rows | ['Mã đơn hàng', 'Số ngày được nợ', 'Hạn thanh toán']
+- Danh sách hàng hóa: 55 rows | ['Hình ảnh (url1,url2...)', 'Vị trí', 'Trọng lượng', 'Bảo hành', 'Mã hàng hóa', 'Mã barcode', 'Mô tả sản phẩm', 'Tên hàng hóa', 'Loại hàng hóa', 'Nhóm hàng hóa', 'Đơn vị tính', 'Mã HH Liên quan', 'Tồn lớn nhất', 'Ghi chú', 'Mẫu ghi chú', 'Được bán trực tiếp']
+- So_chi_tiet_ban_hang (dict, sheets=['T02-2025', 'T03-2025', 'T04-2025', 'T05-2025', 'T06-2025', 'T07-2025', 'T08-2025', 'T09-2025', 'T10-2025', 'T11-2025', 'T12-2025', 'T01-2026'])
+    T02-2025: 2075 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi', 'Khách hàng']
+    T03-2025: 2529 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi', 'Khách hàng']
+    T04-2025: 2463 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi', 'Khách hàng']
+- So_chi_tiet_ban_hang__all: 46001 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi', 'Khách hàng']
+
+## biz_119
+- BaoCaoTonKho: 70 rows | ['Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn cuối kỳ']
+- DanhSachChiTietNhapHang: 3122 rows | ['Mã nhập hàng', 'STT', 'Mã hàng', 'ĐVT', 'Số lượng', 'Đơn giá', 'Lô', 'Hạn sử dụng']
+- DanhSachHoaDon (dict, sheets=['T01-2025', 'T02-2025', 'T03-2025', 'T04-2025', 'T05-2025', 'T06-2025', 'T07-2025', 'T08-2025', 'T09-2025', 'T10-2025', 'T11-2025', 'T12-2025'])
+    T01-2025: 2069 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Tổng sau giảm giá', 'Còn nợ']
+    T02-2025: 1823 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Tổng sau giảm giá', 'Còn nợ']
+    T03-2025: 2032 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Tổng sau giảm giá', 'Còn nợ']
+- DanhSachHoaDon__all: 34047 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Tổng sau giảm giá', 'Còn nợ']
+- DanhSachHoaDonChiTiet: 65731 rows | ['Mã hóa đơn', 'Mã hàng', 'Tên hàng', 'Số lượng', 'Đơn giá', 'Giảm giá', 'Thành tiền', 'Số lượng quy đổi', 'STT']
+- DanhSachHoaDonChiTietLo: 65483 rows | ['Mã hóa đơn', 'STT', 'Lô', 'Số lượng (ĐVT cơ bản)', 'Số lượng trả (ĐVT cơ bản)']
+- DanhSachKhachHang: 300 rows | ['Công ty', 'Tổng điểm', 'Mã khách hàng', 'Ghi chú KH', 'Ngày sinh', 'Tên khách hàng', 'Người tạo', 'Đối tượng KH', 'Điểm tích lũy', 'Điện thoại', 'MST', 'Địa chỉ']
+- DanhSachLoHang: 3122 rows | ['Mã nhập hàng', 'Mã hàng', 'Lô', 'Hạn sử dụng', 'Số lượng (ĐVT cơ bản)']
+- DanhSachNhapHang: 554 rows | ['Mã nhập hàng', 'Thời gian', 'Mã NCC', 'Cần trả NCC', 'Trạng thái', 'Ghi chú']
+- DanhSachSanPham: 70 rows | ['Trọng lượng', 'Mã hàng', 'Loại hàng hóa', 'Tên hàng', 'Tồn nhỏ nhất', 'Bảo hành', 'Ghi chú', 'Được bán trực tiếp', 'Mẫu ghi chú', 'Nhóm hàng(3 Cấp)', 'Vị trí kệ', 'Mô tả chi tiết', 'Thuộc tính', 'Hình ảnh (url1,url2...)', 'Giá bán', 'ĐVT', 'Mã HH Liên quan', 'Thương hiệu', 'Mã vạch EAN', 'Tồn lớn nhất']
+- DanhSachThuoc: 70 rows | ['Mã hàng', 'Hoạt chất', 'Thuốc kê đơn']
+
+## biz_120
+- BaoCaoTonKho: 80 rows | ['Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn cuối kỳ']
+- DanhSachChiTietNhapHang: 3866 rows | ['Mã nhập hàng', 'STT', 'Mã hàng', 'ĐVT', 'Số lượng', 'Đơn giá', 'Lô', 'Hạn sử dụng']
+- DanhSachHoaDon (dict, sheets=['01.2025', '02.2025', '03.2025', '04.2025', '05.2025', '06.2025', '07.2025', '08.2025', '09.2025', '10.2025', '11.2025', '12.2025'])
+    01.2025: 2584 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Còn nợ', 'Kênh bán', 'Ghi chú']
+    02.2025: 2459 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Còn nợ', 'Kênh bán', 'Ghi chú']
+    03.2025: 2760 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Còn nợ', 'Kênh bán', 'Ghi chú']
+- DanhSachHoaDon__all: 48389 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Còn nợ', 'Kênh bán', 'Ghi chú']
+- DanhSachHoaDonChiTiet: 90706 rows | ['Mã hóa đơn', 'Mã hàng', 'Tên hàng', 'Số lượng', 'Đơn giá', 'Giảm giá', 'Thành tiền', 'Số lượng quy đổi']
+- DanhSachHoaDonChiTietLo: 92759 rows | ['Mã hóa đơn', 'STT', 'Lô', 'Số lượng (ĐVT cơ bản)', 'Số lượng trả (ĐVT cơ bản)']
+- DanhSachKhachHang: 350 rows | ['Mã khách hàng', 'Ghi chú', 'Mã số thuế', 'Tên khách hàng', 'Người tạo', 'CCCD', 'Ngày sinh', 'E-mail', 'Đối tượng KH', 'Tên công ty', 'Điện thoại', 'Địa chỉ']
+- DanhSachLoHang: 3866 rows | ['Mã nhập hàng', 'Mã hàng', 'Lô', 'Hạn sử dụng', 'Số lượng (ĐVT cơ bản)']
+- DanhSachNhapHang: 526 rows | ['Mã nhập hàng', 'Thời gian', 'Mã NCC', 'Cần trả NCC', 'Trạng thái', 'Ghi chú']
+- DanhSachSanPham: 80 rows | ['Trọng lượng', 'Mã hàng', 'Định mức tồn tối thiểu', 'Tên hàng', 'Mô tả chi tiết', 'Nhóm hàng(3 Cấp)', 'Mẫu ghi chú', 'Định mức tồn tối đa', 'Được bán trực tiếp', 'Bảo hành', 'Mã HH Liên quan', 'Giá bán', 'Loại hàng hóa', 'ĐVT', 'Giá vốn', 'Hình ảnh', 'Thời gian tạo']
+- DanhSachThuoc: 80 rows | ['Mã hàng', 'Hoạt chất', 'Thuốc kê đơn']
+
+## biz_121
+- DonHang_ChiTiet: 82920 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+- DuLieuXuat (dict, sheets=['DanhSachQuyDoi', 'DanhSachSanPham', 'DonNhapHang', 'DonNhapHang_ChiTiet', 'DonHang_Lo', 'DanhSachThuoc'])
+    DanhSachQuyDoi: 83 rows | ['Tên sản phẩm', 'Đơn vị quy đổi', 'Tỉ lệ quy đổi', 'Đơn vị cơ bản']
+    DanhSachSanPham: 80 rows | ['Vị trí', 'Ghi chú', 'Mã SKU', 'Bảo hành', 'Thương hiệu', 'Mẫu ghi chú', 'Tên sản phẩm', 'Trọng lượng', 'Mã barcode', 'Đơn vị', 'Mã HH Liên quan', 'Tồn lớn nhất', 'Hình ảnh (url1,url2...)', 'Thuộc tính', 'Mô tả chi tiết', 'Loại sản phẩm', 'Loại hàng hóa']
+    DonNhapHang: 566 rows | ['Mã đơn nhập', 'Ngày nhập', 'Mã nhà cung cấp']
+
+## biz_122
+- DanhSachQuyDoi: 83 rows | ['Tên sản phẩm', 'Đơn vị quy đổi', 'Tỉ lệ quy đổi', 'Đơn vị cơ bản']
+- DanhSachSanPham: 75 rows | ['Ghi chú', 'Mô tả sản phẩm', 'Tồn lớn nhất', 'Vị trí', 'Mã SKU', 'Mã HH Liên quan', 'Thương hiệu', 'Thuộc tính', 'Tên sản phẩm', 'Hình ảnh', 'Trọng lượng', 'Mã vạch EAN', 'Bảo hành', 'Đơn vị', 'Định mức tồn tối thiểu', 'Loại hàng hóa', 'Mẫu ghi chú', 'Loại sản phẩm']
+- DanhSachThuoc: 75 rows | ['Mã SKU', 'Hoạt chất', 'Thuốc kê đơn']
+- DonHang_ChiTiet_1 (dict, sheets=['T01-2025', 'T02-2025', 'T03-2025', 'T04-2025', 'T05-2025', 'T06-2025', 'T07-2025', 'T08-2025', 'T09-2025', 'T10-2025', 'T11-2025', 'T12-2025'])
+    T01-2025: 5516 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+    T02-2025: 4909 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+    T03-2025: 5355 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+- DonHang_ChiTiet_1__all: 94478 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+- DonHang_ChiTiet_2026 (dict, sheets=['T06-2026', 'T07-2026'])
+    T06-2026: 5751 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+    T07-2026: 3434 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+- DonHang_ChiTiet_2026__all: 9185 rows | ['Mã đơn hàng', 'Ngày đặt hàng', 'Trạng thái đơn hàng', 'Tên khách hàng', 'Tên sản phẩm', 'Số lượng sản phẩm', 'Giá sản phẩm', 'Tổng tiền', 'Đơn vị tính']
+- DonHang_Lo_1: 100000 rows | ['Mã đơn hàng', 'Mã lô', 'Số lượng', 'Số lượng trả']
+- DonHang_Lo_2: 5799 rows | ['Mã đơn hàng', 'Mã lô', 'Số lượng', 'Số lượng trả']
+- DonNhapHang: 560 rows | ['Mã đơn nhập', 'Ngày nhập', 'Mã nhà cung cấp']
+- DonNhapHang_ChiTiet: 4051 rows | ['Mã đơn nhập', 'Mã SKU', 'Mã lô', 'Hạn sử dụng', 'Số lượng nhập']
+
+## biz_123
+- chi_nhanh: 1 rows | ['IDCuaHang', 'MaChiNhanh', 'TenGoi', 'DiaChiLienHe', 'NgayKhaiTruong']
+- nhan_vien: 3 rows | ['IDCuaHang', 'MaNhanVien', 'TenGoi', 'MaChiNhanh', 'ChucVu', 'NgayNhanViec', 'NgayThoiViec']
+- khach_hang: 300 rows | ['trang_thai_kh', 'cccd', 'IDCuaHang', 'diem_hien_tai', 'MaKhachHang', 'ghi_chu_kh', 'ngay_sinh', 'email', 'TenGoi', 'SoDienThoai', 'NamNu', 'nguoi_tao', 'LoaiKhachHang', 'cong_ty', 'tong_diem', 'TaoLuc', 'loai_hinh_kh', 'DiaChiLienHe']
+- nha_cung_cap: 5 rows | ['IDCuaHang', 'MaNhaCungCap', 'TenGoi', 'SoDienThoai', 'DiaChiLienHe']
+- san_pham: 80 rows | ['hinh_anh', 'ma_vach_ean', 'bao_hanh', 'ban_truc_tiep', 'IDCuaHang', 'MaHangHoa', 'ghi_chu_hh', 'vi_tri', 'TenGoi', 'DanhMuc', 'loai_hang_hoa', 'ton_nho_nhat', 'thuong_hieu', 'DonViCoSo', 'GiaBanLe', 'GiaVonHang', 'mau_ghi_chu', 'mo_ta', 'TyLeThue', 'ConKinhDoanh', 'TaoLuc', 'ton_lon_nhat']
+- don_vi_sp: 83 rows | ['IDCuaHang', 'MaHangHoa', 'DonViTinh', 'HeSoQuyDoi', 'GiaDonVi']
+- phieu_nhap: 540 rows | ['IDCuaHang', 'MaPhieuNhap', 'MaNhaCungCap', 'MaChiNhanh', 'NgayNhapKho', 'TinhTrang', 'TongGiaTriNhap', 'DienGiai']
+- chi_tiet_nhap: 2953 rows | ['IDCuaHang', 'MaPhieuNhap', 'SoThuTu', 'MaHangHoa', 'DonViTinh', 'SL', 'DonGiaNhap', 'MaLo', 'HanSuDung']
+- don_hang: 33630 rows | ['IDCuaHang', 'MaHoaDon', 'MaChiNhanh', 'MaKhachHang', 'MaNhanVien', 'MaCaLam', 'KenhBanHang', 'ThoiGianLap', 'NgayLap', 'TinhTrang', 'TongTienHang', 'ChietKhau', 'PhiVanChuyen', 'ThueGTGT', 'TongThanhToan', 'KhachDaTra', 'ConPhaiThu', 'PhuongThucTT', 'SoHoaDonDienTu', 'TinhTrangHDDT', 'MaKhuyenMai', 'DienGiai']
+- chi_tiet_don: 64149 rows | ['IDCuaHang', 'MaHoaDon', 'SoThuTu', 'MaHangHoa', 'DonViTinh', 'SL', 'SLQuyDoi', 'GiaDonVi', 'ChietKhau', 'TriGia', 'GiaVonLucBan']
+- thanh_toan: 33816 rows | ['IDCuaHang', 'MaPhieuThu', 'MaHoaDon', 'NgayGioThu', 'SoTienThu', 'PhuongThuc', 'DienGiai']
+- tra_hang: 273 rows | ['IDCuaHang', 'MaPhieuTra', 'MaHoaDon', 'NgayGioTra', 'NguyenNhan', 'TienHoanTra', 'CachHoanTien']
+- the_kho: 65514 rows | ['IDCuaHang', 'MaGiaoDichKho', 'MaHangHoa', 'MaChiNhanh', 'NgayGioPhatSinh', 'LoaiGiaoDich', 'SLQuyDoi', 'KieuChungTu', 'MaChungTu', 'TonCuoi']
+- lich_su_gia: 109 rows | ['IDCuaHang', 'MaHangHoa', 'NgayApDung', 'GiaBanLe']
+- lo_hang: 2953 rows | ['IDCuaHang', 'MaHangHoa', 'MaLo', 'MaPhieuNhap', 'HanSuDung', 'SLNhapQuyDoi', 'DonGiaNhap']
+- chi_tiet_don_lo: 64422 rows | ['IDCuaHang', 'MaHoaDon', 'SoThuTu', 'MaLo', 'SLQuyDoi', 'SLTraQuyDoi']
+- thong_tin_thuoc: 80 rows | ['IDCuaHang', 'MaHangHoa', 'ThanhPhanChinh', 'BanTheoDon']
+
+## biz_124
+- BanHang_BanTheoLo: 97880 rows | ['Lô', 'SL quy ra lẻ', 'SL trả (ĐVT cơ bản)', 'No.', 'Mã hóa đơn']
+- BanHang_ChiTietHoaDon: 97033 rows | ['Giá vốn lúc bán', 'SL cơ bản', 'Khuyến mãi', 'Giá niêm yết', 'Thanh tien', 'Mã giao dịch', 'Chi tiết hàng', 'Slg', 'TT dòng', 'Ma hang', 'Đ.vị']
+- BanHang_DonViQuyDoi: 83 rows | ['Đơn vị', 'Bằng', 'Giá bán theo đơn vị quy đổi', 'Mã sp']
+- BanHang_HangHoa: 80 rows | ['Định mức tồn tối thiểu', 'Giá vốn hiện tại', 'Thương hiệu', 'Thuộc tính', 'Phân loại', 'Món', 'Được bán trực tiếp', 'Mã HH Liên quan', 'ma_sp', 'Mô tả sản phẩm', 'Mẫu ghi chú', 'Giá', 'Ghi chú', 'Đơn vị', 'Trọng lượng', 'Loại hàng hóa']
+- BanHang_HoaDon: 51044 rows | ['Đã thu', 'Tên KH', 'Trạng thái', 'Giờ tạo đơn', 'Mã NV bán', 'Phương thức TT', 'Ngày bán', 'Nguồn đơn', 'Còn nợ', 'Mã KH mua', 'Tiền hàng trước giảm', 'Tong tien', 'Order ID', 'CK']
+- BanHang_KhachHang: 380 rows | ['Điểm tích lũy', 'Công ty', 'Hạng', 'E-mail', 'MST', 'Ngày sinh', 'CCCD', 'Trạng thái', 'ten_kh', 'Người tạo', 'Ghi chú', 'Tổng điểm', 'Loại hình khách', 'Số điện thoại', 'Customer ID']
+- BanHang_LichSuGia: 114 rows | ['Mã sản phẩm', 'Giá mới', 'Ngày áp dụng', 'Sản phẩm', 'Giá cũ']
+- BanHang_LoHang: 3943 rows | ['HSD', 'Mã món', 'SL nhập (ĐVT cơ bản)', 'Mã phiếu nhập', 'Lô']
+- BanHang_PhieuThu: 51238 rows | ['Số tiền thu', 'Mã bill', 'Phiếu thu', 'Thời gian thu', 'PTTT']
+- BanHang_Thuoc: 80 rows | ['Mã HH', 'Hoạt chất', 'Kê đơn']
+- SoTay_ChiPhi: 75 rows | ['Ghi chú', 'Ngày chi', 'Mục', 'So tien']
+- SoTay_NhapHang: 3943 rows | ['SL nhập', 'Mô tả', 'Product', 'Thành tiền', 'Lô', 'HSD', 'Ngày nhập', 'Nhà cung cấp', 'ĐVT nhập', 'Số phiếu', 'Giá nhập']
+- ton_kho: 80 rows | ['ID SP', 'Đơn vị', 'Ton kho', 'Hàng hóa']
+
+## biz_125
+- ban_hang: 79052 rows | ['dvt', 'Hàng bán', 'Khách hàng (tên)', 'Số lượng lẻ', 'Amount', 'Trạng thái xử lý', 'SL bán', 'Ngày bán', 'Số phiếu', 'Giá 1 đv']
+
+## biz_126
+- SoBanHang: 66429 rows | ['Đơn vị tính', 'Số lượng bán', 'Thành tiền (đ)', 'Ten hang', 'SL lẻ', 'Trạng thái đơn', 'Ngày tháng', 'Price']
+
+## biz_127
+- chi_tiet_don: 131192 rows | ['Mã đơn hàng', 'SoLuong', 'No.', 'DVT', 'Amount', 'Số lượng lẻ', 'Mã mặt hàng', 'Đơn giá (đ)']
+- don_hang: 33874 rows | ['Còn nợ', 'Diễn giải', 'Tổng đơn', 'Loại bán', 'Ngày', 'Mã chứng từ', 'Customer ID', 'Khách trả', 'Trả bằng', 'Tình trạng']
+- khach_hang: 200 rows | ['CCCD', 'Tên công ty', 'Di động', 'Email', 'Sinh nhật', 'Người tạo', 'Tổng điểm', 'Loại hình khách', 'Mã KH', 'Khách hàng (tên)', 'Điểm hiện tại', 'MST', 'Trạng thái', 'Ghi chú']
+- san_pham: 61 rows | ['Trọng lượng', 'Giá niêm yết', 'Mô tả chi tiết', 'Danh mục', 'Ghi chú', 'Mã sản phẩm bán', 'Tên SP', 'Mẫu ghi chú', 'Mã barcode', 'Loại hàng hóa', 'Tồn lớn nhất', 'Thương hiệu', 'Thuộc tính', 'Hình ảnh (url1,url2...)', 'Đơn vị cơ bản', 'Được bán trực tiếp', 'Mã HH Liên quan']
+- thanh_toan: 33473 rows | ['Số CT', 'Ngày thu', 'Mã GD', 'Giá trị', 'HTTT']
+
+## biz_128
+- BaoCaoTonKho: 55 rows | ['Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn cuối kỳ']
+- DanhSachChiTietNhapHang: 1454 rows | ['Mã nhập hàng', 'STT', 'Mã hàng', 'ĐVT', 'Số lượng', 'Đơn giá']
+- DanhSachHoaDon (dict, sheets=['04.2025', '05.2025', '06.2025', '07.2025', '08.2025', '09.2025', '10.2025', '11.2025', '12.2025', '01.2026', '02.2026', '03.2026'])
+    04.2025: 1537 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Tổng sau giảm giá', 'Còn nợ']
+    05.2025: 1524 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Tổng sau giảm giá', 'Còn nợ']
+    06.2025: 1389 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Tổng sau giảm giá', 'Còn nợ']
+- DanhSachHoaDon__all: 26505 rows | ['Mã hóa đơn', 'Thời gian', 'Mã KH', 'Khách hàng', 'Tổng tiền hàng', 'Giảm giá', 'Khách đã trả', 'Trạng thái', 'Thời gian tạo', 'Tổng sau giảm giá', 'Còn nợ']
+- DanhSachHoaDonChiTiet: 99650 rows | ['Mã hóa đơn', 'Mã hàng', 'Tên hàng', 'Số lượng', 'Đơn giá', 'Giảm giá', 'Thành tiền', 'Số lượng quy đổi', 'STT']
+- DanhSachHoaDonPhongBan: 23880 rows | ['Mã hóa đơn', 'Phòng/Bàn', 'Khu vực', 'Số khách']
+- DanhSachKhachHang: 180 rows | ['Sinh nhật', 'Người tạo', 'Mã khách hàng', 'Email', 'Tên khách hàng', 'Điện thoại', 'Nhóm khách hàng', 'Loại hình khách', 'Điểm hiện tại', 'CCCD', 'Ghi chú KH', 'Công ty', 'Địa chỉ', 'Trạng thái', 'Giới tính', 'MST', 'Tổng điểm']
+- DanhSachNhapHang: 479 rows | ['Mã nhập hàng', 'Thời gian', 'Mã NCC', 'Cần trả NCC', 'Trạng thái', 'Ghi chú']
+- DanhSachSanPham: 56 rows | ['Mã hàng', 'Tồn nhỏ nhất', 'Loại hàng hóa', 'Tồn lớn nhất', 'Tên hàng', 'Nhóm hàng(3 Cấp)', 'Ghi chú', 'Giá bán', 'Thương hiệu', 'Mã HH Liên quan', 'Mẫu ghi chú', 'Mã barcode', 'Vị trí', 'Thuộc tính', 'Hình ảnh', 'ĐVT', 'Mô tả chi tiết', 'Trọng lượng', 'Thời gian tạo']
+
+## biz_129
+- chi_tiet_don: 145479 rows | ['Tiền bán', 'TT dòng', 'S.L', 'Mã hàng bán', 'Quy ra ĐV lẻ', 'Số CT', 'Giảm giá', 'Giá 1 đv', 'ĐV tính']
+- don_hang: 38499 rows | ['Hình thức thanh toán', 'Dư nợ', 'Thanh toán', 'Tình trạng đơn', 'Số phiếu', 'Mã khách mua', 'Phải thu', 'Ngày bán']
+- khach_hang: 220 rows | ['Ghi chú KH', 'Ngày sinh', 'Điểm hiện tại', 'Nhóm', 'Tổng điểm', 'KH', 'Email', 'Mã số thuế', 'Người tạo', 'Công ty', 'Số điện thoại', 'Số CMND/CCCD', 'Đối tượng KH', 'Trạng thái', 'Mã khách lẻ/sỉ']
+- san_pham: 61 rows | ['Bảo hành', 'Giá hiện tại', 'Mã vạch EAN', 'Mã HH Liên quan', 'Đơn vị tính', 'Tên sản phẩm', 'Vị trí kệ', 'Nhom hang', 'Mô tả chi tiết', 'Ghi chú', 'Mẫu ghi chú', 'Được bán trực tiếp', 'Mã HH', 'Loại hàng hóa', 'Thuộc tính', 'Thương hiệu', 'Hình ảnh', 'Định mức tồn tối đa']
+- thanh_toan: 38072 rows | ['Mã GD', 'PTTT', 'Tiền', 'Mã giao dịch', 'Thời điểm']
+
+## biz_130
+- Danh sách hàng hóa: 61 rows | ['Mã hàng hóa', 'Mô tả sản phẩm', 'Bảo hành', 'Được bán trực tiếp', 'Loại hàng hóa', 'Mã HH Liên quan', 'Mẫu ghi chú', 'Tên hàng hóa', 'Nhóm hàng hóa', 'Thương hiệu', 'Định mức tồn tối thiểu', 'Vị trí kệ', 'Đơn vị tính', 'Định mức tồn tối đa', 'Ghi chú', 'Giá vốn']
+- So_chi_tiet_ban_hang_1: 100000 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi']
+- So_chi_tiet_ban_hang_2: 72530 rows | ['Ngày', 'Mã đơn hàng', 'Tên hàng hóa', 'Đơn vị tính', 'Số lượng', 'Đơn giá', 'Thành tiền', 'Trạng thái', 'Số lượng quy đổi']

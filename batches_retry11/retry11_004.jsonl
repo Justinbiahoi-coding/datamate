@@ -1,0 +1,4 @@
+{"id": "q_46d72d387508", "business_id": "biz_128", "question": "ti le huy don thang 4/2026 la bn %", "as_of_date": "2026-09-07", "_gold_type": "percent", "_gold_answer": 2.18, "_gold_alias": []}
+{"id": "q_5b2ef4e4d0c0", "business_id": "biz_128", "question": "coi giumf toongr dthu trong ngày hôm nay là bnhiu", "as_of_date": "2025-04-27", "_gold_type": "number", "_gold_answer": 16506000, "_gold_alias": []}
+{"id": "q_635a91eb5125", "business_id": "biz_128", "question": "dthu hnay là bao nhiu", "as_of_date": "2025-07-19", "_gold_type": "number", "_gold_answer": 26768000, "_gold_alias": []}
+{"id": "q_37f16cb07f76", "business_id": "biz_130", "question": "Cho hỏi tháng 4/2026 cửa hàng có bao nhiêu % đơn bị huỷ?", "as_of_date": "2026-08-29", "_gold_type": "percent", "_gold_answer": 1.57, "_gold_alias": []}

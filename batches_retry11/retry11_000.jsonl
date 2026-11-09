@@ -1,0 +1,13 @@
+{"id": "q_33dde77085e2", "business_id": "biz_102", "question": "hqua dthu được bao nhiêu?", "as_of_date": "2025-09-12", "_gold_type": "number", "_gold_answer": 11163500, "_gold_alias": []}
+{"id": "q_353d8057e573", "business_id": "biz_102", "question": "Trung bình mỗi đơn tháng 4/2026 mang về bao nhiêu doanh thu?", "as_of_date": "2026-06-16", "_gold_type": "number", "_gold_answer": 169725, "_gold_alias": []}
+{"id": "q_528984a6439d", "business_id": "biz_102", "question": "check giùm trung binhf mỗi đơn tháng 4/2025 mang về nhiêu dthu", "as_of_date": "2026-06-16", "_gold_type": "number", "_gold_answer": 163519, "_gold_alias": []}
+{"id": "q_026fabde15fc", "business_id": "biz_103", "question": "Cho hỏi tổng doanh thu quý 2/2026 là bao nhiêu?", "as_of_date": "2026-07-09", "_gold_type": "number", "_gold_answer": 518445500, "_gold_alias": []}
+{"id": "q_2eba6308baa7", "business_id": "biz_103", "question": "ti le huy don thang 4/2026 la bnhiu %", "as_of_date": "2026-07-09", "_gold_type": "percent", "_gold_answer": 1.89, "_gold_alias": []}
+{"id": "q_367419209f8f", "business_id": "biz_103", "question": "ti le huy don thang 7/2025 la bn % vay", "as_of_date": "2026-07-09", "_gold_type": "percent", "_gold_answer": 3.16, "_gold_alias": []}
+{"id": "q_511dc77f671a", "business_id": "biz_103", "question": "dthu tuần rồi của cửa hàng là bao nhiêu", "as_of_date": "2025-06-09", "_gold_type": "number", "_gold_answer": 34548600, "_gold_alias": []}
+{"id": "q_0e96d244ad69", "business_id": "biz_104", "question": "Tháng 5/2025 cửa hàng có bao nhiêu % đơn bị huỷ ạ?", "as_of_date": "2026-06-02", "_gold_type": "percent", "_gold_answer": 2.25, "_gold_alias": []}
+{"id": "q_38c6a6d7f4c4", "business_id": "biz_104", "question": "Trong quý 4 năm 2025, doanh thu của cửa hàng được bao nhiêu tiền?", "as_of_date": "2026-06-02", "_gold_type": "number", "_gold_answer": 591684500, "_gold_alias": []}
+{"id": "q_45d1788daa18", "business_id": "biz_104", "question": "trong tháng 3/2026, tỉ lệ đơn huỷ là nhiêu %", "as_of_date": "2026-06-02", "_gold_type": "percent", "_gold_answer": 1.8, "_gold_alias": []}
+{"id": "q_00558c1410ef", "business_id": "biz_105", "question": "tỉ lệ huỷ đơn tháng 6/2025 là nhiêu %", "as_of_date": "2026-06-24", "_gold_type": "percent", "_gold_answer": 2.08, "_gold_alias": []}
+{"id": "q_2f603f3adc11", "business_id": "biz_105", "question": "tháng 11/2025 cuwar hangf có bn % đơn bị huỷ nhỉ", "as_of_date": "2026-06-24", "_gold_type": "percent", "_gold_answer": 2.26, "_gold_alias": []}
+{"id": "q_f4966c224caa", "business_id": "biz_105", "question": "Cho hỏi tháng 3/2026 cửa hàng có bao nhiêu % đơn bị huỷ?", "as_of_date": "2026-06-24", "_gold_type": "percent", "_gold_answer": 2.2, "_gold_alias": []}

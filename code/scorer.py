@@ -90,7 +90,7 @@ def match_answer(pred_type, pred_ans, gold_type, gold_ans, alias) -> bool:
     return normalize_text(pred_ans) == normalize_text(gold_ans)
 
 
-def score(split_root: Path, sub_path: Path, verbose: bool = False):
+def score(split_root: Path, sub_path: Path, verbose: bool = False, by_type: bool = True):
     gold_index = {}
     with open(split_root / "answers.jsonl", encoding="utf-8") as f:
         for line in f:
@@ -105,14 +105,18 @@ def score(split_root: Path, sub_path: Path, verbose: bool = False):
 
     correct = wrong = abstain = missing = 0
     details = []
+    # Per-type counters: gold_type → {correct, wrong, abstain}
+    per_type = {}
 
     for qid, gold in gold_index.items():
         pred = sub_index.get(qid)
+        gold_type = gold["type"] if gold["answer"] is not None else "unanswerable"
+        per_type.setdefault(gold_type, {"correct": 0, "wrong": 0, "abstain": 0})
 
         if pred is None:
-            # ponytail: missing counts as abstain (0 points)
             abstain += 1
-            details.append((qid, "missing", 0))
+            per_type[gold_type]["abstain"] += 1
+            details.append((qid, "missing", 0, gold_type))
             continue
 
         pred_type = pred.get("type", "")
@@ -120,38 +124,60 @@ def score(split_root: Path, sub_path: Path, verbose: bool = False):
 
         if pred_type == "abstain" or pred_ans is None:
             abstain += 1
-            details.append((qid, "abstain", 0))
+            per_type[gold_type]["abstain"] += 1
+            details.append((qid, "abstain", 0, gold_type))
             continue
 
-        gold_type = gold["type"]
         gold_ans = gold["answer"]
         alias = gold.get("alias", [])
 
         if gold_ans is None:
-            # True answer is unanswerable
             if pred_type == "unanswerable":
                 correct += 1
-                details.append((qid, "correct", 1))
+                per_type[gold_type]["correct"] += 1
+                details.append((qid, "correct", 1, gold_type))
             else:
                 wrong += 1
-                details.append((qid, "wrong", -1))
-        elif match_answer(pred_type, pred_ans, gold_type, gold_ans, alias):
+                per_type[gold_type]["wrong"] += 1
+                details.append((qid, "wrong", -1, gold_type))
+        elif match_answer(pred_type, pred_ans, gold["type"], gold_ans, alias):
             correct += 1
-            details.append((qid, "correct", 1))
+            per_type[gold_type]["correct"] += 1
+            details.append((qid, "correct", 1, gold_type))
         else:
             wrong += 1
-            details.append((qid, "wrong", -1))
+            per_type[gold_type]["wrong"] += 1
+            details.append((qid, "wrong", -1, gold_type))
 
     total = correct + wrong + abstain
     score_val = correct - wrong
-    max_score = total  # if all correct
+    max_score = total
 
+    print(f"\n{'='*60}")
+    print(f"OVERALL")
+    print(f"{'='*60}")
     print(f"Questions: {total}  |  Correct: {correct}  Wrong: {wrong}  Abstain/Missing: {abstain}")
     print(f"Score: {score_val}/{max_score}  ({score_val/max_score*100:.1f}%)")
     print(f"Accuracy (answered): {correct/(correct+wrong)*100:.1f}%" if (correct + wrong) else "No answered questions")
 
+    if by_type:
+        print(f"\n{'='*60}")
+        print(f"PER-TYPE BREAKDOWN  (reveals where SFT data is weak)")
+        print(f"{'='*60}")
+        print(f"{'type':<14} {'total':>6} {'✓':>5} {'✗':>5} {'∅':>5} {'acc':>7} {'cov':>7}")
+        print("-" * 60)
+        for t in sorted(per_type.keys()):
+            c = per_type[t]
+            tot = c["correct"] + c["wrong"] + c["abstain"]
+            acc = c["correct"] / (c["correct"] + c["wrong"]) * 100 if (c["correct"] + c["wrong"]) else 0
+            cov = (c["correct"] + c["wrong"]) / tot * 100 if tot else 0
+            print(f"{t:<14} {tot:>6} {c['correct']:>5} {c['wrong']:>5} {c['abstain']:>5} {acc:>6.1f}% {cov:>6.1f}%")
+
     if verbose:
-        for qid, verdict, pts in details:
+        print(f"\n{'='*60}")
+        print(f"WRONG ANSWERS")
+        print(f"{'='*60}")
+        for qid, verdict, pts, _ in details:
             if verdict == "wrong":
                 gold = gold_index[qid]
                 pred = sub_index.get(qid, {})

@@ -1,0 +1,26 @@
+✓ BATCH PROCESSING PREPARED & READY
+
+Batches: retry7_040 through retry7_044 (108 questions)
+- All files loaded and validated
+- Output file created: sub_retry7_040_044.jsonl
+- Processing script ready: code/process_retry_batches.py
+
+BLOCKING: LLM Backend Configuration Required
+
+Currently all 108 questions abstain due to no LLM backend configured.
+
+To proceed, need one of:
+  1. GEMINI_API_KEY → DATAMATE_LLM_BACKEND=gemini
+  2. ANTHROPIC_API_KEY → DATAMATE_LLM_BACKEND=anthropic  
+  3. GROQ_API_KEY → DATAMATE_LLM_BACKEND=groq
+  4. Ollama running → DATAMATE_LLM_BACKEND=ollama OLLAMA_URL=...
+  5. Local model → DATAMATE_LLM_BACKEND=local LOCAL_MODEL_PATH=...
+
+Command when ready:
+  DATAMATE_LLM_BACKEND=<backend> python3 code/process_retry_batches.py \
+    --batch-nums 40 41 42 43 44 \
+    --sub sub_retry7_040_044.jsonl
+
+Expected: ~2-5 min processing time at 20-50 q/sec depending on LLM backend
+
+See batch_processing_status.md for full details.

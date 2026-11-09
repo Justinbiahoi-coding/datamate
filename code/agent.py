@@ -45,32 +45,68 @@ def exec_code(code: str, biz_data: dict, as_of_date: str) -> Any:
         )
 
     def parse_date(series):
-        """Parse dates: handles dd/mm/yyyy, 'D thg M YYYY' (Vietnamese), Excel serial ints."""
+        """Parse dates: ISO, dd/mm/yyyy, 'D thg M YYYY' (Vietnamese), Excel serial ints.
+
+        Important: `dayfirst=True` alone mis-parses ISO strings such as
+        '2025-03-01' as 2025-01-03. We therefore detect ISO-like values first
+        and parse them with yearfirst=True, and only use dayfirst for
+        dd/mm/yyyy-style values.
+        """
         import pandas as _pd
         import re as _re
-        result = _pd.to_datetime(series, dayfirst=True, errors='coerce')
-        mask = result.isna() & series.notna()
-        if mask.any():
-            # Handle Vietnamese format: "1 thg 5 2026" or "01 thg 05 2026"
-            def _parse_vn(s):
-                s = str(s)
-                m = _re.match(r'(\d+)\s+thg\s+(\d+)\s+(\d{4})', s, _re.IGNORECASE)
-                if m:
-                    d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
-                    try:
-                        return _pd.Timestamp(y, mo, d)
-                    except Exception:
-                        pass
-                # Excel serial number fallback
-                try:
-                    f = float(s)
-                    if 1000 < f < 100000:
-                        return _pd.Timestamp('1899-12-30') + _pd.Timedelta(days=f)
-                except Exception:
-                    pass
-                return _pd.NaT
-            vn_dates = series[mask].apply(_parse_vn)
-            result[mask] = vn_dates
+        if not isinstance(series, _pd.Series):
+            series = _pd.Series(series)
+
+        result = _pd.Series(_pd.NaT, index=series.index, dtype="datetime64[ns]")
+
+        # Excel serial numbers (e.g. 45658) must be converted manually:
+        # pd.to_datetime would treat them as nanoseconds since 1970.
+        numeric = _pd.to_numeric(series, errors="coerce")
+        num_mask = numeric.notna() & (numeric > 1000) & (numeric < 100000)
+        if num_mask.any():
+            result.loc[num_mask] = _pd.Timestamp("1899-12-30") + _pd.to_timedelta(
+                numeric.loc[num_mask], unit="D"
+            )
+
+        rest = series.notna() & ~num_mask
+        if rest.any():
+            s = series.loc[rest].astype(str).str.strip()
+            idx = s.index
+
+            # ISO-like: YYYY-MM-DD / YYYY/MM/DD (optionally with time)
+            iso_mask = s.str.match(r"^\d{4}[-/]\d{1,2}[-/]\d{1,2}", na=False)
+            if iso_mask.any():
+                iso = _pd.to_datetime(
+                    s[iso_mask].str.replace("/", "-", regex=False),
+                    yearfirst=True, errors="coerce",
+                )
+                result.loc[idx[iso_mask]] = iso
+
+            # dd/mm/yyyy or dd-mm-yyyy
+            dmy_mask = ~iso_mask & s.str.match(r"^\d{1,2}[-/]\d{1,2}[-/]\d{4}", na=False)
+            if dmy_mask.any():
+                dmy = _pd.to_datetime(s[dmy_mask], dayfirst=True, errors="coerce")
+                result.loc[idx[dmy_mask]] = dmy
+
+            # Vietnamese: "1 thg 5 2026"
+            vn_mask = ~iso_mask & ~dmy_mask & s.str.contains(r"thg", case=False, regex=True, na=False)
+            if vn_mask.any():
+                def _parse_vn(x):
+                    m = _re.match(r"(\d+)\s+thg\s+(\d+)\s+(\d{4})", x, _re.IGNORECASE)
+                    if m:
+                        d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                        try:
+                            return _pd.Timestamp(y, mo, d)
+                        except Exception:
+                            pass
+                    return _pd.NaT
+                result.loc[idx[vn_mask]] = s[vn_mask].apply(_parse_vn)
+
+            # Fallback for anything else
+            other = ~iso_mask & ~dmy_mask & ~vn_mask
+            if other.any():
+                result.loc[idx[other]] = _pd.to_datetime(s[other], dayfirst=True, errors="coerce")
+
         return result
 
     # Build augmented data dict (includes sub-sheet keys so data["stem__sheet"] works)
@@ -336,8 +372,13 @@ def infer_type(value: Any) -> tuple[str, Any]:
         return "number", round(value, 2)
     if isinstance(value, int):
         return "number", value
+    # Try parse as date (YYYY-MM-DD or YYYY-MM)
+    import re as _re
+    s = str(value).strip()
+    if _re.match(r'^\d{4}-\d{2}(-\d{2})?$', s):
+        return "date", s
     # Try parse as number
-    s = str(value).strip().rstrip("%")
+    s = s.rstrip("%")
     try:
         f = float(s.replace(",", ""))
         if str(value).endswith("%"):
@@ -374,7 +415,8 @@ def call_llm(prompt: str, system: str = SYSTEM_PROMPT, history: list = None) -> 
         import torch
         msgs = [{"role": "system", "content": system}] + messages + [{"role": "user", "content": prompt}]
         text = _LOCAL_TOKENIZER.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
-        inputs = _LOCAL_TOKENIZER(text, return_tensors="pt").to(_LOCAL_MODEL.device)
+        _device = next(_LOCAL_MODEL.parameters()).device
+        inputs = _LOCAL_TOKENIZER(text, return_tensors="pt").to(_device)
         with torch.no_grad():
             out = _LOCAL_MODEL.generate(**inputs, max_new_tokens=2000, temperature=0.3, do_sample=True, pad_token_id=_LOCAL_TOKENIZER.eos_token_id)
         return _LOCAL_TOKENIZER.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
@@ -424,6 +466,20 @@ def call_llm(prompt: str, system: str = SYSTEM_PROMPT, history: list = None) -> 
         )
         return resp.content[0].text
 
+    if backend == "ollama":
+        # Local Qwen qua Ollama (không cần API key)
+        from openai import OpenAI
+        client = OpenAI(
+            api_key="ollama",
+            base_url=os.environ.get("OLLAMA_URL", "http://localhost:11434/v1"),
+        )
+        msgs = [{"role": "system", "content": system}] + messages + [{"role": "user", "content": prompt}]
+        resp = client.chat.completions.create(
+            model=os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:14b"),
+            messages=msgs, max_tokens=2000, temperature=0.3,
+        )
+        return resp.choices[0].message.content
+
     if backend == "groq":
         from openai import OpenAI
         client = OpenAI(api_key=os.environ["GROQ_API_KEY"], base_url="https://api.groq.com/openai/v1")
@@ -453,9 +509,15 @@ def infer(item: dict, split_root: Path, rulebook: str, max_retries: int = 2) -> 
     except Exception as e:
         return {"id": qid, "type": "abstain", "answer": None, "_err": str(e)}
 
-    data_keys = [k for k in biz_data if not k.startswith("_")]
-    rulebook_excerpt = rulebook[:2000]
-    prompt = build_prompt(question, as_of_date, biz_schema, rulebook_excerpt, data_keys)
+    import os as _os
+    if _os.environ.get("DATAMATE_PROMPT", "v2") == "v2":
+        from prompt_v2 import SYSTEM_PROMPT_V2, describe_business_v2, build_user_prompt_v2, select_rules
+        system = SYSTEM_PROMPT_V2
+        prompt = build_user_prompt_v2(question, as_of_date, describe_business_v2(str(biz_dir)), select_rules(rulebook))
+    else:
+        system = SYSTEM_PROMPT
+        data_keys = [k for k in biz_data if not k.startswith("_")]
+        prompt = build_prompt(question, as_of_date, biz_schema, rulebook[:2000], data_keys)
 
     history = []
     last_code = ""
@@ -469,7 +531,7 @@ def infer(item: dict, split_root: Path, rulebook: str, max_retries: int = 2) -> 
         else:
             current_prompt = prompt
 
-        llm_output = call_llm(current_prompt, history=history)
+        llm_output = call_llm(current_prompt, system=system, history=history)
         if not llm_output.strip():
             return {"id": qid, "type": "abstain", "answer": None}
 
@@ -548,7 +610,7 @@ def main():
                 submission_item = {k: v for k, v in result.items() if k != "_err"}
             else:
                 submission_item = {k: v for k, v in result.items() if not k.startswith("_")}
-            fout.write(json.dumps(submission_item, ensure_ascii=False) + "\n")
+            fout.write(json.dumps(submission_item, ensure_ascii=False, default=lambda o: o.item() if hasattr(o, 'item') else str(o)) + "\n")
             fout.flush()  # flush ngay, không mất khi crash
 
             if result.get("type") == "abstain":

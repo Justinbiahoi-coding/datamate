@@ -1,0 +1,6 @@
+KẾT QUẢ KIỂM ĐỊNH CHẶT CUỐI (sub_final5.jsonl)
+tổng: 3000
+trạng thái: {'ok': 2998, 'tolerance_only': 2}
+cú pháp lỗi: 0 | không gán RESULT: 0 | dùng giờ hệ thống: 0
+theo nguồn: {'gemini': {'ok': 153}, 'compact12': {'ok': 129}, 'resolve11': {'ok': 51, 'tolerance_only': 2}, 'sonnet': {'ok': 2445}, 'sonnet+datefix': {'ok': 198}, 'gemini+datefix': {'ok': 8}, 'resolve11+datefix': {'ok': 3}, 'compact12+datefix': {'ok': 11}}
+id không đạt ( 2 ): [('q_bf4b4edb1f1f', 'tolerance_only', ''), ('q_cc1d4620a18e', 'tolerance_only', '')]

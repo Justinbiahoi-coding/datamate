@@ -1,0 +1,8 @@
+{"id": "q_fe699a7dc387", "business_id": "biz_105", "question": "giá trị trung bình một đơn tháng 3/2025 là bao nhiêu ta", "as_of_date": "2026-06-24", "_gold_type": "number", "_gold_answer": 70888, "_gold_alias": []}
+{"id": "q_fe8f9e79f8b5", "business_id": "biz_124", "question": "Trừ thuốc kê đơn ra, tháng 4/2026 các mặt hàng còn lại bán đc bao nhiêu tiền", "as_of_date": "2026-05-25", "_gold_type": "number", "_gold_answer": 356487300, "_gold_alias": []}
+{"id": "q_fecb9f3bc765", "business_id": "biz_104", "question": "trong quý 2 năm 2025 có tổng cộng bao nhiêu đơn", "as_of_date": "2026-06-02", "_gold_type": "number", "_gold_answer": 8375, "_gold_alias": []}
+{"id": "q_fecee73687be", "business_id": "biz_104", "question": "Cho tôi biết doanh thu hqua.", "as_of_date": "2025-11-23", "_gold_type": "number", "_gold_answer": 8165000, "_gold_alias": []}
+{"id": "q_ff044c6f2f4e", "business_id": "biz_115", "question": "trung binh moi don thang 9/2025 mang ve bnhiu dthu ta", "as_of_date": "2026-05-16", "_gold_type": "number", "_gold_answer": 1363579, "_gold_alias": []}
+{"id": "q_ff15a54587af", "business_id": "biz_128", "question": "Tháng 9/2025 riêng ca sáng bán được tổng cộng bao nhiêu tiền?", "as_of_date": "2026-09-07", "_gold_type": "number", "_gold_answer": 343749000, "_gold_alias": []}
+{"id": "q_ff2b80a25b4e", "business_id": "biz_119", "question": "hqua cửa hàng bán ra tổng cộng mấy gói?", "as_of_date": "2026-07-02", "_gold_type": "number", "_gold_answer": 220, "_gold_alias": []}
+{"id": "q_ffbb247c3151", "business_id": "biz_123", "question": "Tuần trước ca chiều bán được mấy đơn?", "as_of_date": "2025-06-23", "_gold_type": "number", "_gold_answer": 256, "_gold_alias": []}

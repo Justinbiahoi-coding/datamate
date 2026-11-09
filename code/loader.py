@@ -8,6 +8,9 @@ Usage:
     # data["_files"]    → list of file paths loaded
 """
 import sqlite3
+import os
+import hashlib
+import pickle
 from pathlib import Path
 from functools import lru_cache
 
@@ -17,24 +20,69 @@ try:
 except ImportError as e:
     raise ImportError(f"pip install pandas openpyxl: {e}")
 
+# Disk cache for parsed business data. Excel parsing is very slow, and SFT
+# generation touches the same business many times. The cache key includes
+# file names + mtimes + sizes, so it invalidates automatically when data
+# changes. Override location with DATAMATE_CACHE_DIR.
+CACHE_DIR = Path(os.environ.get("DATAMATE_CACHE_DIR", "/tmp/datamate_cache"))
+CACHE_VERSION = 1
+
+
+def _cache_key(biz_dir: Path) -> str:
+    h = hashlib.md5()
+    h.update(str(biz_dir.resolve()).encode())
+    for p in sorted(biz_dir.iterdir()):
+        if p.name.startswith("."):
+            continue
+        st = p.stat()
+        h.update(f"{p.name}:{st.st_mtime_ns}:{st.st_size}".encode())
+    return h.hexdigest()[:16]
+
 
 
 def _read_sheet_smart(xl, sheet_name, max_skip=5) -> "pd.DataFrame":
-    """Read sheet, auto-detect real header row by skipping title rows."""
-    for skip in range(0, max_skip + 1):
-        df = pd.read_excel(xl, sheet_name=sheet_name, header=0, skiprows=skip if skip else None)
-        unnamed = sum(1 for c in df.columns if str(c).startswith("Unnamed:"))
-        # If >50% unnamed cols, likely not the header row yet
-        if unnamed / max(len(df.columns), 1) < 0.5:
-            return df
-    # fallback: return with skip=0
-    return pd.read_excel(xl, sheet_name=sheet_name, header=0)
+    """Read sheet, auto-detect real header row by skipping title rows.
+
+    Optimized: peek at only the first few rows to pick the header row, then
+    read the sheet once. The previous implementation re-read the whole sheet
+    up to 6 times, which was extremely slow on big multi-sheet workbooks.
+    """
+    try:
+        peek = pd.read_excel(xl, sheet_name=sheet_name, header=None, nrows=max_skip + 2)
+    except Exception:
+        peek = None
+
+    best = 0
+    if peek is not None and len(peek):
+        best_score = -1.0
+        for i in range(min(max_skip + 1, len(peek))):
+            row = peek.iloc[i]
+            score = row.notna().sum() / max(len(row), 1)
+            if score > best_score:
+                best_score = score
+                best = i
+        if best_score < 0.5:
+            best = 0
+
+    return pd.read_excel(xl, sheet_name=sheet_name, header=0, skiprows=best if best else None)
 
 
 @lru_cache(maxsize=64)
 def load_business(biz_dir: Path) -> dict:
     """Return dict of name→DataFrame (or str for _readme)."""
     biz_dir = Path(biz_dir)
+
+    # Try disk cache first (Excel parsing is expensive).
+    cache_path = None
+    try:
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        cache_path = CACHE_DIR / f"{biz_dir.name}_{_cache_key(biz_dir)}_v{CACHE_VERSION}.pkl"
+        if cache_path.exists():
+            with open(cache_path, "rb") as f:
+                return pickle.load(f)
+    except Exception:
+        cache_path = None
+
     result = {"_files": [], "_readme": ""}
 
     readme = biz_dir / "README.md"
@@ -79,6 +127,13 @@ def load_business(biz_dir: Path) -> dict:
                 result[tname] = pd.read_sql(f"SELECT * FROM [{tname}]", con)
             con.close()
             result["_files"].append(str(path))
+
+    if cache_path is not None:
+        try:
+            with open(cache_path, "wb") as f:
+                pickle.dump(result, f, protocol=pickle.HIGHEST_PROTOCOL)
+        except Exception:
+            pass
 
     return result
 
@@ -130,8 +185,13 @@ def _col_hints(df, max_sample=4) -> str:
     return f" [{', '.join(hints)}]" if hints else ""
 
 
+@lru_cache(maxsize=64)
 def describe_business(biz_dir: Path) -> str:
-    """Return schema summary for LLM context, with actual variable names."""
+    """Return schema summary for LLM context, with actual variable names.
+
+    Cached: schema only depends on the business directory contents, so this is
+    safe to reuse across questions of the same business (big speedup for SFT gen).
+    """
     import pandas as pd
     data = load_business(Path(biz_dir))
     lines = [f"# Business: {Path(biz_dir).name}"]

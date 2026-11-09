@@ -149,10 +149,10 @@ def generate_via_vllm(prompt: str, n: int = 3, url: str = "http://localhost:8000
 
 # ── SFT message formatter ────────────────────────────────────────────────────
 
-def make_messages(prompt: str, code: str) -> list[dict]:
+def make_messages(prompt: str, code: str, system: str = SYSTEM_PROMPT) -> list[dict]:
     """Format as chat messages for SFT training."""
     return [
-        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": system},
         {"role": "user", "content": prompt},
         {"role": "assistant", "content": f"```python\n{code}\n```"},
     ]
@@ -160,8 +160,21 @@ def make_messages(prompt: str, code: str) -> list[dict]:
 
 # ── Mode: tái dùng submission.jsonl (không gọi LLM) ───────────────────────────
 
+def _normalize_code_hash(code: str) -> str:
+    """AST-normalize code: parse → unparse to strip whitespace/comment differences.
+    Fallback: whitespace-normalized text hash."""
+    import ast, hashlib, re
+    try:
+        tree = ast.parse(code)
+        normalized = ast.unparse(tree)
+    except Exception:
+        normalized = re.sub(r'\s+', ' ', code).strip()
+    return hashlib.md5(normalized.encode('utf-8')).hexdigest()
+
+
 def main_from_submission(args):
-    """Đọc submission.jsonl có _code, lọc câu đúng → SFT data."""
+    """Đọc submission.jsonl có _code, lọc câu đúng → SFT data.
+    Áp dụng: length filter (technique #10) + AST dedup (#11) + per-type stats (#12)."""
     base = Path(args.data_dir) if args.data_dir else ROOT
     split_root = base / "train"
     rulebook = (split_root / "rulebook.md").read_text(encoding="utf-8")
@@ -171,9 +184,16 @@ def main_from_submission(args):
     with open(split_root / "questions.jsonl", encoding="utf-8") as f:
         q_index = {json.loads(l)["id"]: json.loads(l) for l in f if l.strip()}
 
-    n_ok = n_wrong = n_nocode = 0
-    with open(args.from_submission, encoding="utf-8") as fin, \
-         open(args.out, "w", encoding="utf-8") as fout:
+    # Stats per type (gold type)
+    stats_ok = {}      # type → count correct
+    stats_wrong = {}   # type → count wrong
+    stats_biz = {}     # biz → count correct
+    n_too_long = n_dup = n_nocode = n_wrong = 0
+    MAX_CHARS = args.max_chars  # ≈ MAX_CHARS/4 tokens
+    seen_hashes = set()
+    records = []  # collect then write
+
+    with open(args.from_submission, encoding="utf-8") as fin:
         for line in fin:
             sub = json.loads(line)
             qid = sub["id"]
@@ -183,30 +203,88 @@ def main_from_submission(args):
                 n_nocode += 1
                 continue
 
-            # So pred vs gold
-            if match_answer(sub["type"], sub["answer"], gold["type"], gold["answer"], gold.get("alias", [])):
-                item = q_index[qid]
-                biz_dir = split_root / "data" / item["business_id"]
-                try:
-                    biz_schema = describe_business(biz_dir)
-                except Exception:
-                    n_nocode += 1
-                    continue
-                prompt = build_prompt(item["question"], item["as_of_date"], biz_schema, rulebook[:2000])
-                record = {
-                    "id": qid,
-                    "messages": make_messages(prompt, code),
-                    "gold_type": gold["type"],
-                    "gold_answer": gold["answer"],
-                }
-                fout.write(json.dumps(record, ensure_ascii=False) + "\n")
-                n_ok += 1
-            else:
-                n_wrong += 1
+            gold_type = gold["type"] if gold["answer"] is not None else "unanswerable"
 
-    print(f"Xong → {args.out}")
-    print(f"  SFT records: {n_ok}  (agent đúng, code được lưu)")
-    print(f"  Bỏ qua:      {n_wrong} (agent sai)  +  {n_nocode} (không có _code hoặc gold)")
+            # So pred vs gold
+            if not match_answer(sub["type"], sub["answer"], gold["type"], gold["answer"], gold.get("alias", [])):
+                stats_wrong[gold_type] = stats_wrong.get(gold_type, 0) + 1
+                n_wrong += 1
+                continue
+
+            item = q_index[qid]
+            biz_id = item["business_id"]
+            biz_dir = split_root / "data" / biz_id
+            try:
+                biz_schema = describe_business(biz_dir)
+            except Exception:
+                n_nocode += 1
+                continue
+            if getattr(args, "prompt_version", "v1") == "v2":
+                import prompt_v2 as PV2
+                system_msg = PV2.SYSTEM_PROMPT_V2
+                prompt = PV2.build_user_prompt_v2(item["question"], item["as_of_date"],
+                                                  PV2.describe_business_v2(str(biz_dir)), PV2.select_rules(rulebook))
+            else:
+                system_msg = SYSTEM_PROMPT
+                prompt = build_prompt(item["question"], item["as_of_date"], biz_schema, rulebook[:2000])
+
+            # Technique #10: length filter
+            total_chars = len(prompt) + len(code) + len(system_msg)
+            if total_chars > MAX_CHARS:
+                n_too_long += 1
+                continue
+
+            # Technique #11: AST dedup
+            code_hash = _normalize_code_hash(code)
+            if code_hash in seen_hashes and not args.no_dedup:
+                n_dup += 1
+                continue
+            seen_hashes.add(code_hash)
+
+            record = {
+                "id": qid,
+                "messages": make_messages(prompt, code, system_msg),
+                "gold_type": gold_type,
+                "gold_answer": gold["answer"],
+                "biz_id": biz_id,
+            }
+            records.append(record)
+            stats_ok[gold_type] = stats_ok.get(gold_type, 0) + 1
+            stats_biz[biz_id] = stats_biz.get(biz_id, 0) + 1
+
+    with open(args.out, "w", encoding="utf-8") as fout:
+        for r in records:
+            fout.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+    n_ok = len(records)
+    print(f"\n{'='*60}")
+    print(f"SFT DATA: {args.out}  →  {n_ok} records")
+    print(f"{'='*60}")
+    print(f"  ✓ kept:          {n_ok}")
+    print(f"  ✗ wrong answer:  {n_wrong}")
+    print(f"  ✗ too long:      {n_too_long}  (> {MAX_CHARS} chars ≈ {MAX_CHARS//4} tokens)")
+    print(f"  ✗ duplicate:     {n_dup}  (AST-normalized hash)")
+    print(f"  ✗ no code/gold:  {n_nocode}")
+
+    # Per-type stats
+    print(f"\n{'─'*60}")
+    print(f"PER-TYPE SFT DATA  (what model will learn)")
+    print(f"{'─'*60}")
+    print(f"{'type':<14} {'kept':>6} {'wrong':>6} {'keep_rate':>10}")
+    print("-" * 60)
+    for t in sorted(set(stats_ok) | set(stats_wrong)):
+        kept = stats_ok.get(t, 0)
+        wr = stats_wrong.get(t, 0)
+        rate = kept / (kept + wr) * 100 if (kept + wr) else 0
+        marker = " ⚠️ LOW COVERAGE" if kept < 20 else ""
+        print(f"{t:<14} {kept:>6} {wr:>6} {rate:>9.1f}%{marker}")
+
+    # Top businesses with most training examples
+    if stats_biz:
+        top_biz = sorted(stats_biz.items(), key=lambda x: -x[1])[:5]
+        print(f"\nTop 5 biz by record count: {top_biz}")
+        bot_biz = sorted(stats_biz.items(), key=lambda x: x[1])[:3]
+        print(f"Bottom 3 biz: {bot_biz}")
 
 
 # ── Main pipeline ─────────────────────────────────────────────────────────────
@@ -267,8 +345,14 @@ def main():
     parser.add_argument("--dry-run", action="store_true",
                         help="Print first few prompts without calling LLM")
     parser.add_argument("--data-dir", default=None)
+    parser.add_argument("--prompt-version", choices=["v1", "v2"], default="v1",
+                        help="v2 = code/prompt_v2.py (full README + full rulebook, short system prompt)")
+    parser.add_argument("--no-dedup", action="store_true",
+                        help="Keep records whose code is identical (different questions, same code)")
     parser.add_argument("--from-submission", default=None,
                         help="Tái dùng code trong submission.jsonl (yêu cầu --save-code)")
+    parser.add_argument("--max-chars", type=int, default=14000,
+                        help="Drop examples > max_chars (≈3500 tokens @ 4 chars/tok)")
     args = parser.parse_args()
 
     # Mode 1: tái dùng submission.jsonl (nhanh, không gọi LLM)
