@@ -35,3 +35,4 @@ checkpoints/
 
 # Jupyter
 .ipynb_checkpoints/
+.venv/
