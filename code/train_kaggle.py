@@ -62,6 +62,15 @@ model = FastLanguageModel.get_peft_model(
     random_state=SEED,
 )
 
+INIT_ADAPTER = os.environ.get("INIT_ADAPTER", "")
+if INIT_ADAPTER:
+    from peft import set_peft_model_state_dict
+    from safetensors.torch import load_file
+    _res = set_peft_model_state_dict(model, load_file(os.path.join(INIT_ADAPTER, "adapter_model.safetensors")))
+    _unexp = getattr(_res, "unexpected_keys", [])
+    print(f"[INIT] LoRA weights from {INIT_ADAPTER}  unexpected_keys={len(_unexp)}")
+    assert not _unexp, "adapter does not match this model/LoRA config"
+
 # ── Dataset: train/val split ──────────────────────────────────────────────────
 
 import json
@@ -145,6 +154,27 @@ trainer = train_on_responses_only(
     instruction_part="<|im_start|>user\n",
     response_part="<|im_start|>assistant\n",
 )
+
+_lab = trainer.train_dataset[0]["labels"]
+_frac = sum(x != -100 for x in _lab) / len(_lab)
+print(f"[MASK] sample0: {sum(x != -100 for x in _lab)}/{len(_lab)} tokens carry loss ({_frac:.1%})")
+assert 0 < _frac < 0.5, "loss is not restricted to the assistant reply"
+
+# Kaggle kills the session at 12h; stop early and save so the adapter is not lost.
+import time
+from transformers import TrainerCallback
+TIME_LIMIT_H = float(os.environ.get("TIME_LIMIT_H", "11"))
+_t0 = float(os.environ.get("KERNEL_T0", time.time()))  # count from session start, not from here
+
+class TimeLimit(TrainerCallback):
+    def on_step_end(self, args, state, control, **kw):
+        if time.time() - _t0 > TIME_LIMIT_H * 3600:
+            print(f"[TIME] {TIME_LIMIT_H}h reached at step {state.global_step}, stopping")
+            control.should_training_stop = True
+            control.should_save = True
+        return control
+
+trainer.add_callback(TimeLimit())
 
 # ── Train (resume-able for 14B split sessions) ───────────────────────────────
 

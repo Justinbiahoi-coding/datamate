@@ -71,19 +71,38 @@ def make_call_llm(model, tokenizer, device):
                 do_sample=False,  # greedy cho reproducibility (requirement BTC: |ΔPA|≤0.03)
                 pad_token_id=tokenizer.pad_token_id,
                 eos_token_id=tokenizer.eos_token_id,
-                repetition_penalty=1.05,
             )
         return tokenizer.decode(out[0][in_len:], skip_special_tokens=True)
 
     return call_llm
 
 
-# ── vLLM batch path (continuous batching + prefix cache) ─────────────────────
+# ── vLLM batch path: K candidates per question, execution voting, abstain when unsure ──────
+# PA scoring: +1 correct, 0 abstain, -1 wrong -> answer only when candidates agree.
+# Thresholds are defaults; calibrate VOTE_MIN_AGREE / VOTE_MIN_SHARE on the hold-out set.
+VOTE_K = int(os.environ.get("VOTE_K", "5"))                    # 1 greedy + K-1 sampled candidates
+VOTE_TEMP = float(os.environ.get("VOTE_TEMP", "0.7"))
+VOTE_MIN_AGREE = int(os.environ.get("VOTE_MIN_AGREE", "2"))    # winning answer needs this many candidates
+VOTE_MIN_SHARE = float(os.environ.get("VOTE_MIN_SHARE", "0.4"))  # ...and this share of all candidates
+REPAIRS = int(os.environ.get("VOTE_REPAIRS", "2"))             # failed candidates re-asked with real columns
 _BIZ_CACHE = {}
 
 
+def _tables_columns(biz):
+    out = []
+    for k, v in biz.items():
+        if k.startswith("_"):
+            continue
+        if isinstance(v, dict):
+            for sheet, df in list(v.items())[:1] + [(s, d) for s, d in v.items() if s == "all"]:
+                out.append(f"- `{k}__{sheet}`: {list(map(str, df.columns))}")
+        else:
+            out.append(f"- `{k}`: {list(map(str, v.columns))}")
+    return "\n".join(out)[:4000]
+
+
 def _exec_worker(args):
-    """Runs in a pool process: signal.alarm works there (main thread), so runaway code is killed."""
+    """Pool process (signal.alarm needs the main thread). Returns (ok, type, value, err, columns_on_error)."""
     import signal, copy
     biz_dir, code, as_of_date = args
     def _to(*_):
@@ -95,67 +114,132 @@ def _exec_worker(args):
             _BIZ_CACHE[biz_dir] = _agent_mod.load_business(Path(biz_dir))
         res = _agent_mod.exec_code(code, copy.deepcopy(_BIZ_CACHE[biz_dir]), as_of_date)
         t, v = _agent_mod.infer_type(res)
-        return True, t, v, None
+        return True, t, v, None, None
     except BaseException as e:  # noqa: BLE001
-        return False, None, None, str(e)[:300]
+        cols = _tables_columns(_BIZ_CACHE[biz_dir]) if biz_dir in _BIZ_CACHE else ""
+        return False, None, None, f"{type(e).__name__}: {str(e)[:250]}", cols
     finally:
         signal.alarm(0)
 
 
-def run_vllm(args, questions, data_root, rulebook, fout, logs_dir, done_ids, max_retries=2, chunk=100):
+def _answer_key(t, v):
+    if t == "number":
+        try:
+            return t, f"{float(v):.6f}"
+        except (TypeError, ValueError):
+            pass
+    if t == "percent":
+        try:
+            return t, f"{float(str(v).rstrip('%')):.2f}"
+        except ValueError:
+            pass
+    return t, json.dumps(v, ensure_ascii=False, sort_keys=True, default=str)
+
+
+def _decide(cands, k):
+    """cands: list of dicts with ok/type/value/code. Returns (result_fields, votes_summary)."""
+    ok = [c for c in cands if c["ok"]]
+    tally = {}
+    for c in ok:
+        tally.setdefault(_answer_key(c["type"], c["value"]), []).append(c)
+    votes = sorted(((len(v), key) for key, v in tally.items()), key=lambda x: -x[0])
+    summary = {"k": k, "executed": len(ok), "failed": len(cands) - len(ok),
+               "votes": [[n, key[0], key[1][:80]] for n, key in votes[:5]]}
+    if not votes:
+        return None, summary
+    n, key = votes[0]
+    need = 1 if k == 1 else max(VOTE_MIN_AGREE, VOTE_MIN_SHARE * k)
+    tie = len(votes) > 1 and votes[1][0] == n
+    if n < need or tie:
+        return None, summary
+    win = tally[key][0]
+    return {"type": win["type"], "answer": win["value"], "_code": win["code"]}, summary
+
+
+def solve_batch(items, gen, pool, data_root, rulebook, k=None):
+    """gen(list_of_message_lists, n, temperature) -> list of n texts per prompt. Backend-agnostic for testing."""
+    k = k or VOTE_K
+    st = {}
+    for it in items:
+        try:
+            system, prompt, biz_dir = _agent_mod.build_item_prompt(it, data_root, rulebook)
+            st[it["id"]] = dict(item=it, msgs=[{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+                                biz=str(biz_dir), cands=[])
+        except Exception as e:  # noqa: BLE001
+            st[it["id"]] = dict(item=it, err=str(e)[:150], cands=None)
+    live = [v for v in st.values() if v["cands"] is not None]
+
+    def run(vs, codes):
+        jobs = [(v["biz"], c, v["item"]["as_of_date"]) for v, c in zip(vs, codes)]
+        for v, c, r in zip(vs, codes, pool.map(_exec_worker, jobs)):
+            v["cands"].append(dict(ok=r[0], type=r[1], value=r[2], err=r[3], cols=r[4], code=c))
+
+    msgs = [v["msgs"] for v in live]
+    greedy = gen(msgs, 1, 0.0)
+    sampled = gen(msgs, k - 1, VOTE_TEMP) if k > 1 else [[] for _ in live]
+    vs, codes = [], []
+    for v, g, s in zip(live, greedy, sampled):
+        for txt in g + s:
+            vs.append(v); codes.append(_agent_mod.extract_code(txt))
+    run(vs, codes)
+
+    # Repair: questions without a confident answer re-ask failed candidates with the real column names.
+    need_fix = []
+    for v in live:
+        res, _ = _decide(v["cands"], k)
+        if res is None:
+            need_fix += [(v, c) for c in [c for c in v["cands"] if not c["ok"]][:REPAIRS]]
+    if need_fix:
+        fix_msgs = [v["msgs"] + [{"role": "assistant", "content": f"```python\n{c['code']}\n```"},
+                                 {"role": "user", "content": f"Error: {c['err']}\nThe tables and their exact column names are:\n"
+                                                             f"{c['cols']}\nFix the code. Assign the answer to RESULT."}]
+                    for v, c in need_fix]
+        outs = gen(fix_msgs, 1, 0.0)
+        run([v for v, _ in need_fix], [_agent_mod.extract_code(o[0]) for o in outs])
+
+    results = {}
+    for qid, v in st.items():
+        if v["cands"] is None:
+            results[qid] = {"id": qid, "type": "abstain", "answer": None, "_err": v["err"]}
+            continue
+        res, summary = _decide(v["cands"], k)
+        errs = [c["err"] for c in v["cands"] if c["err"]]
+        if res is None:
+            best = next((c for c in v["cands"] if c["ok"]), v["cands"][0] if v["cands"] else {})
+            results[qid] = {"id": qid, "type": "abstain", "answer": None, "_code": best.get("code"),
+                            "_err": errs[0] if errs else "no agreement", "_votes": summary}
+        else:
+            results[qid] = {"id": qid, **res, "_votes": summary}
+    return results
+
+
+def run_vllm(args, questions, data_root, rulebook, fout, logs_dir, done_ids, chunk=100):
     import multiprocessing as mp
     pool = mp.get_context("fork").Pool(min(8, os.cpu_count() or 2))  # fork BEFORE CUDA init
     from vllm import LLM, SamplingParams
     llm = LLM(model=args.model, dtype="bfloat16", enable_prefix_caching=True,
               max_model_len=24000, gpu_memory_utilization=0.90, tensor_parallel_size=1)
     tok = llm.get_tokenizer()
-    sp = SamplingParams(temperature=0.0, max_tokens=2048, repetition_penalty=1.05)
+
+    def gen(msg_lists, n, temperature):
+        texts = [tok.apply_chat_template(m, tokenize=False, add_generation_prompt=True) for m in msg_lists]
+        sp = SamplingParams(n=n, temperature=temperature, top_p=1.0 if temperature == 0 else 0.95,
+                            max_tokens=2048, seed=1234)
+        return [[c.text for c in o.outputs] for o in llm.generate(texts, sp, use_tqdm=False)]
+
     todo = [q for q in questions if q["id"] not in done_ids]
     n_ans = n_abs = 0
     t_start = time.time()
     for c0 in range(0, len(todo), chunk):
         batch = todo[c0:c0 + chunk]
         t0 = time.time()
-        st = {}
-        for it in batch:
-            try:
-                system, prompt, biz_dir = _agent_mod.build_item_prompt(it, data_root, rulebook)
-                st[it["id"]] = dict(item=it, system=system, prompt=prompt, biz=str(biz_dir), hist=[], code="", err=None, res=None)
-            except Exception as e:
-                st[it["id"]] = dict(item=it, res={"id": it["id"], "type": "abstain", "answer": None, "_err": str(e)[:150]})
-        for attempt in range(max_retries + 1):
-            pend = [v for v in st.values() if v["res"] is None]
-            if not pend:
-                break
-            texts = []
-            for v in pend:
-                msgs = [{"role": "system", "content": v["system"]}] + v["hist"] + \
-                       [{"role": "user", "content": v["prompt"] if attempt == 0 else ""}]
-                texts.append(tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True))
-            outs = llm.generate(texts, sp, use_tqdm=False)
-            jobs = []
-            for v, o in zip(pend, outs):
-                txt = o.outputs[0].text
-                if not txt.strip():
-                    v["res"] = {"id": v["item"]["id"], "type": "abstain", "answer": None}
-                    continue
-                v["code"] = _agent_mod.extract_code(txt)
-                jobs.append(v)
-            for v, r in zip(jobs, pool.map(_exec_worker, [(v["biz"], v["code"], v["item"]["as_of_date"]) for v in jobs])):
-                ok, t, ans, err = r
-                if ok:
-                    v["res"] = {"id": v["item"]["id"], "type": t, "answer": ans, "_code": v["code"]}
-                else:
-                    v["err"] = err
-                    v["hist"] += [{"role": "assistant", "content": f"```python\n{v['code']}\n```"},
-                                  {"role": "user", "content": f"Error: {err}\nFix the code."}]
+        res = solve_batch(batch, gen, pool, data_root, rulebook)
         per_q = (time.time() - t0) / max(len(batch), 1)
         for it in batch:
-            v = st[it["id"]]
-            res = v["res"] or {"id": it["id"], "type": "abstain", "answer": None, "_err": v.get("err"), "_code": v.get("code")}
-            _write_result(fout, logs_dir, it, res, per_q)
-            n_abs += res.get("type") == "abstain"
-            n_ans += res.get("type") != "abstain"
+            r = res[it["id"]]
+            _write_result(fout, logs_dir, it, r, per_q)
+            n_abs += r.get("type") == "abstain"
+            n_ans += r.get("type") != "abstain"
         el = time.time() - t_start
         done = c0 + len(batch)
         print(f"  [{done}/{len(todo)}]  ans={n_ans} abs={n_abs}  ETA={(len(todo)-done)*el/max(done,1)/60:.0f}m", flush=True)
@@ -172,7 +256,7 @@ def _write_result(fout, logs_dir, item, result, elapsed):
     log_item = {"id": qid, "biz_id": item.get("business_id"), "question": item.get("question"),
                 "as_of_date": item.get("as_of_date"), "answer": sub_item.get("answer"),
                 "type": sub_item.get("type"), "elapsed_sec": round(elapsed, 2),
-                "code": result.get("_code"), "err": result.get("_err")}
+                "code": result.get("_code"), "err": result.get("_err"), "votes": result.get("_votes")}
     (logs_dir / f"{qid}.json").write_text(json.dumps(log_item, ensure_ascii=False, indent=2,
                                                      default=lambda o: o.item() if hasattr(o, "item") else str(o)))
 

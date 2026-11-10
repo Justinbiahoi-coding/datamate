@@ -15,6 +15,7 @@ Run:
   python agent.py --split public_test --out submission.jsonl
 """
 import json
+import re
 import sys
 import argparse
 import textwrap
@@ -29,6 +30,56 @@ from loader import load_business, describe_business  # noqa: E402
 
 
 # ── Sandbox execution ────────────────────────────────────────────────────────
+
+_RE_THOUS_COMMA = re.compile(r"^\d{1,3}(,\d{3})+$")
+_RE_THOUS_DOT = re.compile(r"^\d{1,3}(\.\d{3})+$")
+
+
+def _money_scalar(x):
+    if x is None or isinstance(x, bool):
+        return float("nan")
+    if isinstance(x, (int, float)):
+        return float(x)
+    import unicodedata as _ud
+    s = _ud.normalize("NFC", str(x)).strip().lower()
+    for t in ("₫", "vnđ", "vnd", "đ", " "):
+        s = s.replace(t, "")
+    if not s or s in ("nan", "none", "-"):
+        return float("nan")
+    neg = s.startswith("-")
+    s = s.lstrip("-+")
+    try:
+        if "tr" in s:  # 2tr900 = 2.9M, 16,56tr = 16.56M, 1tr = 1M
+            head, tail = s.split("tr", 1)
+            v = float(head.replace(",", ".") or 0) * 1e6
+            if tail:
+                v += int(tail) * 10 ** (6 - len(tail))
+        elif s.endswith("k"):
+            v = float(s[:-1].replace(",", ".")) * 1e3
+        elif "," in s and "." in s:  # the later separator is the decimal one
+            if s.rfind(".") > s.rfind(","):
+                v = float(s.replace(",", ""))
+            else:
+                v = float(s.replace(".", "").replace(",", "."))
+        elif "," in s:
+            v = float(s.replace(",", "")) if _RE_THOUS_COMMA.match(s) else float(s.replace(",", "."))
+        elif "." in s:
+            v = float(s.replace(".", "")) if _RE_THOUS_DOT.match(s) else float(s)
+        else:
+            v = float(s)
+    except ValueError:
+        return float("nan")
+    return -v if neg else v
+
+
+def money(x):
+    """Parse Vietnamese money: 1.200.000đ, 1,200,000, 25,000.0000, 129 000, 41k, 2tr900, 16,56tr, -45.000đ.
+    Accepts a scalar or a Series; returns float / float Series (NaN if not a number)."""
+    import pandas as _pd
+    if isinstance(x, _pd.Series):
+        return x.map(_money_scalar).astype(float)
+    return _money_scalar(x)
+
 
 def exec_code(code: str, biz_data: dict, as_of_date: str) -> Any:
     """Execute LLM-generated pandas code; return value of last expression or RESULT variable."""
@@ -215,6 +266,7 @@ def exec_code(code: str, biz_data: dict, as_of_date: str) -> Any:
         return set(rx_sp.apply(normalize_text))
 
     local_ns["get_rx_product_names"] = get_rx_product_names
+    local_ns["money"] = money
 
     stdout_buf = io.StringIO()
     with contextlib.redirect_stdout(stdout_buf):
@@ -500,9 +552,11 @@ def build_item_prompt(item: dict, split_root: Path, rulebook: str):
     biz_dir = split_root / "data" / item["business_id"]
     question, as_of_date = item["question"], item["as_of_date"]
     import os as _os
-    if _os.environ.get("DATAMATE_PROMPT", "v2") == "v2":
-        from prompt_v2 import SYSTEM_PROMPT_V2, describe_business_v2, build_user_prompt_v2, select_rules
-        return SYSTEM_PROMPT_V2, build_user_prompt_v2(question, as_of_date, describe_business_v2(str(biz_dir)), select_rules(rulebook)), biz_dir
+    version = _os.environ.get("DATAMATE_PROMPT", "v2")
+    if version in ("v2", "v3"):
+        from prompt_v2 import build_versioned_prompt
+        system, prompt = build_versioned_prompt(version, question, as_of_date, biz_dir, rulebook)
+        return system, prompt, biz_dir
     biz_data = load_business(biz_dir)
     data_keys = [k for k in biz_data if not k.startswith("_")]
     return SYSTEM_PROMPT, build_prompt(question, as_of_date, describe_business(biz_dir), rulebook[:2000], data_keys), biz_dir

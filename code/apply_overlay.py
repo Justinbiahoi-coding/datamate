@@ -46,6 +46,9 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--require-shorter", action="store_true")
     ap.add_argument("--require-asof", action="store_true")
+    ap.add_argument("--forbid-def", action="store_true", help="reject code that defines its own functions")
+    ap.add_argument("--max-chars", type=int, default=0, help="reject code longer than this (0 = no limit)")
+    ap.add_argument("--keep-asof", action="store_true", help="reject if the old code used as_of_date and the new one does not")
     a = ap.parse_args()
     gold = {json.loads(l)["id"]: json.loads(l) for l in open("train/answers.jsonl")}
     qs = {json.loads(l)["id"]: json.loads(l) for l in open("train/questions.jsonl")}
@@ -69,6 +72,12 @@ def main():
             rejected[i] = "not shorter"; continue
         if a.require_asof and "as_of_date" not in c:
             rejected[i] = "does not use as_of_date"; continue
+        if a.keep_asof and "as_of_date" in table[i]["_code"] and "as_of_date" not in c:
+            rejected[i] = "dropped as_of_date"; continue
+        if a.forbid_def and re.search(r"^\s*def \w+", c, re.M):
+            rejected[i] = "defines a function"; continue
+        if a.max_chars and len(c) > a.max_chars:
+            rejected[i] = f"longer than {a.max_chars} chars"; continue
         b = q["business_id"]
         if b not in base:
             base[b] = load_business(ROOT / "train" / "data" / b)

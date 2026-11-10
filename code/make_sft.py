@@ -219,11 +219,10 @@ def main_from_submission(args):
             except Exception:
                 n_nocode += 1
                 continue
-            if getattr(args, "prompt_version", "v1") == "v2":
+            if getattr(args, "prompt_version", "v1") in ("v2", "v3"):
                 import prompt_v2 as PV2
-                system_msg = PV2.SYSTEM_PROMPT_V2
-                prompt = PV2.build_user_prompt_v2(item["question"], item["as_of_date"],
-                                                  PV2.describe_business_v2(str(biz_dir)), PV2.select_rules(rulebook))
+                system_msg, prompt = PV2.build_versioned_prompt(args.prompt_version, item["question"],
+                                                                item["as_of_date"], biz_dir, rulebook)
             else:
                 system_msg = SYSTEM_PROMPT
                 prompt = build_prompt(item["question"], item["as_of_date"], biz_schema, rulebook[:2000])
@@ -345,7 +344,7 @@ def main():
     parser.add_argument("--dry-run", action="store_true",
                         help="Print first few prompts without calling LLM")
     parser.add_argument("--data-dir", default=None)
-    parser.add_argument("--prompt-version", choices=["v1", "v2"], default="v1",
+    parser.add_argument("--prompt-version", choices=["v1", "v2", "v3"], default="v1",
                         help="v2 = code/prompt_v2.py (full README + full rulebook, short system prompt)")
     parser.add_argument("--no-dedup", action="store_true",
                         help="Keep records whose code is identical (different questions, same code)")
