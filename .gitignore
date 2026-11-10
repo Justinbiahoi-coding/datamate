@@ -1,0 +1,15 @@
+# Bỏ qua weights mô hình
+models/
+*.safetensors
+*.bin
+
+# Bỏ qua kết quả chạy và logs
+out/
+logs/
+*.jsonl
+
+# Bỏ qua Python cache
+__pycache__/
+*.pyc
+.venv/
+datamate_env/
