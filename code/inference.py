@@ -247,18 +247,34 @@ def run_vllm(args, questions, data_root, rulebook, fout, logs_dir, done_ids, chu
     return n_ans, n_abs
 
 
+def _jsonable(o):
+    return o.item() if hasattr(o, "item") else str(o)
+
+
+def to_submission(t, v):
+    """Official answer format: percent is a number in percent units (gold: 2.08), not the string '2.08%'."""
+    if t == "percent" and isinstance(v, str):
+        try:
+            return float(v.strip().rstrip("%").replace(",", "."))
+        except ValueError:
+            return v
+    return v
+
+
 def _write_result(fout, logs_dir, item, result, elapsed):
+    """Submission line + per-question log in the official format (Docker guide section 3.3):
+    id, answer {type, answer}, elapsed_ms, thinking (null: the model emits code only), code, output."""
     qid = item["id"]
     sub_item = {k: v for k, v in result.items() if not k.startswith("_")}
-    fout.write(json.dumps(sub_item, ensure_ascii=False,
-                          default=lambda o: o.item() if hasattr(o, "item") else str(o)) + "\n")
+    sub_item["answer"] = to_submission(sub_item.get("type"), sub_item.get("answer"))
+    fout.write(json.dumps(sub_item, ensure_ascii=False, default=_jsonable) + "\n")
     fout.flush()
-    log_item = {"id": qid, "biz_id": item.get("business_id"), "question": item.get("question"),
-                "as_of_date": item.get("as_of_date"), "answer": sub_item.get("answer"),
-                "type": sub_item.get("type"), "elapsed_sec": round(elapsed, 2),
-                "code": result.get("_code"), "err": result.get("_err"), "votes": result.get("_votes")}
-    (logs_dir / f"{qid}.json").write_text(json.dumps(log_item, ensure_ascii=False, indent=2,
-                                                     default=lambda o: o.item() if hasattr(o, "item") else str(o)))
+    log_item = {"id": qid, "answer": {"type": sub_item.get("type"), "answer": sub_item.get("answer")},
+                "elapsed_ms": int(round(elapsed * 1000)), "thinking": None,
+                "code": result.get("_code"), "output": sub_item.get("answer"),
+                "error": result.get("_err"), "votes": result.get("_votes"),
+                "business_id": item.get("business_id"), "as_of_date": item.get("as_of_date")}
+    (logs_dir / f"{qid}.json").write_text(json.dumps(log_item, ensure_ascii=False, default=_jsonable))
 
 
 def main():
@@ -345,28 +361,7 @@ def main():
                 traceback.print_exc(file=sys.stderr)
             elapsed = time.time() - t0
 
-            # Submission line: strip internal keys
-            sub_item = {k: v for k, v in result.items() if not k.startswith("_")}
-            fout.write(json.dumps(sub_item, ensure_ascii=False,
-                                  default=lambda o: o.item() if hasattr(o, 'item') else str(o)) + "\n")
-            fout.flush()
-
-            # Per-question log (requirement BTC)
-            log_item = {
-                "id": qid,
-                "biz_id": item.get("business_id"),
-                "question": item.get("question"),
-                "as_of_date": item.get("as_of_date"),
-                "answer": sub_item.get("answer"),
-                "type": sub_item.get("type"),
-                "elapsed_sec": round(elapsed, 2),
-                "code": result.get("_code"),
-                "err": result.get("_err"),
-            }
-            (logs_dir / f"{qid}.json").write_text(
-                json.dumps(log_item, ensure_ascii=False, indent=2,
-                           default=lambda o: o.item() if hasattr(o, 'item') else str(o))
-            )
+            _write_result(fout, logs_dir, item, result, elapsed)
 
             if result.get("type") == "abstain":
                 n_abs += 1
