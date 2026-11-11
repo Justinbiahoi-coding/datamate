@@ -107,6 +107,7 @@ import inspect
 from trl import SFTTrainer, SFTConfig
 
 _sig = inspect.signature(SFTConfig.__init__).parameters
+EVAL_STEPS = int(os.environ.get("EVAL_STEPS", os.environ.get("SAVE_STEPS", "40")))
 _kw = dict(
     per_device_train_batch_size=BATCH_SIZE,
     gradient_accumulation_steps=GRAD_ACCUM,
@@ -120,9 +121,9 @@ _kw = dict(
     save_strategy="steps",
     save_steps=int(os.environ.get("SAVE_STEPS", "40")),
     save_total_limit=3,
-    eval_strategy="steps",                      # eval on val set
-    eval_steps=int(os.environ.get("SAVE_STEPS", "40")),
-    load_best_model_at_end=True,                # keep best val checkpoint
+    eval_strategy="steps" if EVAL_STEPS > 0 else "no",   # EVAL_STEPS=0 skips eval (Colab: every GPU minute counts)
+    eval_steps=EVAL_STEPS if EVAL_STEPS > 0 else None,
+    load_best_model_at_end=EVAL_STEPS > 0,      # keep best val checkpoint
     metric_for_best_model="eval_loss",
     greater_is_better=False,
     optim="adamw_8bit",
