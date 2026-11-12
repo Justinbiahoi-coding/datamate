@@ -10,7 +10,7 @@ Hạn nộp Docker: **16/11/2026 23:59 (GMT+7)**. File này đủ để người
 
 ## 2. Việc cần làm tiếp (theo thứ tự ưu tiên)
 
-1. **Chạy tiếp train t2 trên Colab** (mục 5). Khoảng 8 giờ trên T4. Kết quả: adapter `final_lora` cho prompt v3.
+1. **Chạy tiếp train t2 trên Kaggle** (mục 5, script `kaggle/train_t2_resume.py`). Khoảng 10 giờ trên T4. Kết quả: adapter `final_lora` cho prompt v3.
 2. **Kiểm thử suy luận vLLM trên GPU** với adapter tốt nhất (t2 nếu xong, không thì t1) trên các câu hold-out có đáp án (mục 6): đo độ đúng, tốc độ, và **chỉnh ngưỡng bỏ phiếu** `VOTE_MIN_AGREE`/`VOTE_MIN_SHARE` sao cho điểm (đúng − sai) cao nhất.
 3. **Build Docker** đúng hướng dẫn chính thức (mục 7), chạy thử offline.
 4. **Chạy public test và nộp lên leaderboard** để có điểm tham chiếu (tối đa 5 lần/ngày).
@@ -74,7 +74,16 @@ Cấu hình qua biến môi trường:
 
 Log đầu phải thấy: `[INIT] ... unexpected_keys=0`, `[LEN] ... : 0`, `[DATA] train=1425`, `[MASK] ...(≈1–4%)`, và nếu chạy tiếp thì `[RESUME] from ...`.
 
-### Chạy tiếp t2 trên Colab (cách dễ nhất)
+### Chạy tiếp t2 trên Kaggle
+1. Tài khoản Kaggle **phải xác minh số điện thoại** (Settings → Phone verification); không xác minh thì không có GPU và internet.
+2. Lấy thư mục `colab_t2/` (Thiên gửi; 809 MB). Tạo dataset: **Datasets → New Dataset → upload cả thư mục** (giữ nguyên cấu trúc: `sft_t2.jsonl`, `train_kaggle.py`, `t1_lora/`, `out/checkpoint-10/`). Để Private.
+3. **Code → New Notebook**. Cột phải: **Add Input** → chọn dataset vừa tạo; **Settings → Accelerator: GPU T4 x2**, **Internet: On**.
+4. Dán toàn bộ nội dung `kaggle/train_t2_resume.py` vào một ô. Bấm **Save Version → Save & Run All (Commit)** để chạy nền (tắt trình duyệt cũng được, tối đa 12 giờ).
+5. Log đầu phải có: `DATA ... | CKPT .../checkpoint-10`, `[INIT] ... unexpected_keys=0`, `[RESUME] from .../checkpoint-10`, `[MASK] ...`. Dòng `loss` đầu nên quanh 0,25–0,3.
+6. Thời gian: 80 bước còn lại × ~450 giây ≈ 10 giờ; script tự dừng và lưu ở 11 giờ. Xong: tab **Output** của version có `out/final_lora/` (adapter t2) — tải về hoặc dùng làm input cho kernel khác.
+7. Nếu bị cắt giữa chừng: Kaggle chỉ lưu output khi version chạy xong. Checkpoint lưu mỗi 20 bước trong `out/`; muốn chạy tiếp thì tạo dataset từ checkpoint mới nhất và đổi `checkpoint-10` trong script thành tên checkpoint đó.
+
+### Chạy tiếp t2 trên Colab (cách thay thế)
 1. Lấy thư mục `colab_t2/` (Thiên chia sẻ qua Google Drive; 809 MB): `run_colab_t2.ipynb`, `train_kaggle.py`, `sft_t2.jsonl`, `t1_lora/`, `out/checkpoint-10/`.
 2. Đặt vào **My Drive** đúng đường dẫn `MyDrive/colab_t2`.
 3. Mở notebook bằng Colab, chọn **T4 GPU**, chạy lần lượt các ô (ô 2 hỏi quyền Drive → cho phép). Ô cuối tự chạy tiếp từ checkpoint mới nhất trong `MyDrive/colab_t2/out/`.
