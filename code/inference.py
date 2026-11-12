@@ -203,6 +203,7 @@ def solve_batch(items, gen, pool, data_root, rulebook, k=None):
             results[qid] = {"id": qid, "type": "abstain", "answer": None, "_err": v["err"]}
             continue
         res, summary = _decide(v["cands"], k)
+        summary["cands"] = [[c["ok"], c["type"], str(c["value"])[:120], (c["err"] or "")[:80]] for c in v["cands"]]
         errs = [c["err"] for c in v["cands"] if c["err"]]
         if res is None:
             best = next((c for c in v["cands"] if c["ok"]), v["cands"][0] if v["cands"] else {})
@@ -213,20 +214,33 @@ def solve_batch(items, gen, pool, data_root, rulebook, k=None):
     return results
 
 
-def run_vllm(args, questions, data_root, rulebook, fout, logs_dir, done_ids, chunk=100):
-    import multiprocessing as mp
-    pool = mp.get_context("fork").Pool(min(8, os.cpu_count() or 2))  # fork BEFORE CUDA init
+def make_vllm_gen(model, lora=None, dtype="auto", tp=1, max_len=24000):
+    """vLLM generator gen(message_lists, n, temperature) -> n texts per prompt. Base model + optional LoRA adapter."""
     from vllm import LLM, SamplingParams
-    llm = LLM(model=args.model, dtype="bfloat16", enable_prefix_caching=True,
-              max_model_len=24000, gpu_memory_utilization=0.90, tensor_parallel_size=1)
+    kw = dict(model=model, dtype=dtype, enable_prefix_caching=True, max_model_len=max_len,
+              gpu_memory_utilization=0.90, tensor_parallel_size=tp, seed=1234)
+    lreq = None
+    if lora:
+        from vllm.lora.request import LoRARequest
+        kw.update(enable_lora=True, max_lora_rank=64)
+        lreq = LoRARequest("datamate", 1, lora)
+    llm = LLM(**kw)
     tok = llm.get_tokenizer()
 
     def gen(msg_lists, n, temperature):
         texts = [tok.apply_chat_template(m, tokenize=False, add_generation_prompt=True) for m in msg_lists]
         sp = SamplingParams(n=n, temperature=temperature, top_p=1.0 if temperature == 0 else 0.95,
                             max_tokens=2048, seed=1234)
-        return [[c.text for c in o.outputs] for o in llm.generate(texts, sp, use_tqdm=False)]
+        return [[c.text for c in o.outputs] for o in llm.generate(texts, sp, use_tqdm=False, lora_request=lreq)]
 
+    return gen
+
+
+def run_vllm(args, questions, data_root, rulebook, fout, logs_dir, done_ids, chunk=100):
+    import multiprocessing as mp
+    pool = mp.get_context("fork").Pool(min(8, os.cpu_count() or 2))  # fork BEFORE CUDA init
+    gen = make_vllm_gen(args.model, lora=args.lora, dtype=os.environ.get("VLLM_DTYPE", "auto"),
+                        tp=int(os.environ.get("VLLM_TP", "1")))
     todo = [q for q in questions if q["id"] not in done_ids]
     n_ans = n_abs = 0
     t_start = time.time()
@@ -285,6 +299,7 @@ def main():
     parser.add_argument("--model", default="/app/models/qwen-datamate")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--backend", choices=["auto", "vllm", "hf"], default="auto")
+    parser.add_argument("--lora", default=None, help="LoRA adapter dir served on top of --model (vLLM backend)")
     args = parser.parse_args()
 
     data_root = Path(args.data_root)
